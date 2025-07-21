@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiter - Cafe Order System</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+      <div class="brand-logo">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:10px;"><ellipse cx="18" cy="18" rx="18" ry="18" fill="#FF6B35"/>
+          <path d="M12 24c0 2 2.5 3 6 3s6-1 6-3v-6h-12v6z" fill="#fff"/>
+          <path d="M24 18c0-2.5-2.5-4-6-4s-6 1.5-6 4" stroke="#fff" stroke-width="2" fill="none"/>
+          <ellipse cx="18" cy="14" rx="4" ry="1.5" fill="#fff"/>
+        </svg>
+        <span class="brand-title">Cafe POS</span>
+      </div>
+      <button onclick="window.location.href='index.html'" style="float:right;">Logout</button>
+    </header>
+    <main>
+        <section id="table-panel">
+            <h3>Tables</h3>
+            <div id="tablesGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1em;"></div>
+        </section>
+        <section id="kitchen-note-for-waiter" style="background:#232323;color:#fff;border:2px solid #FF6B35;padding:1em 1.2em;border-radius:12px;box-shadow:0 1px 8px rgba(0,0,0,0.08);margin-bottom:1.3em;max-width:600px;margin-left:auto;margin-right:auto;">
+            <h3 style="color:#FF6B35;margin-top:0;margin-bottom:0.5em;font-size:1.18em;">Kitchen Note</h3>
+            <div id="waiterKitchenNote" style="font-size:1.1em;min-height:2em;">Loading...</div>
+        </section>
+        <section id="order-section" style="font-family:'IBM Plex Sans',Arial,sans-serif;">
+            <h3 style="font-size:1.35em;font-weight:600;color:#FF6B35;letter-spacing:0.01em;margin-bottom:8px;">New Order</h3>
+            <button id="toggleDark" style="float:right;margin-top:-2.5em;">🌙</button>
+            <form id="orderForm">
+                <select id="orderType" required style="width:100%;margin-bottom:8px;padding:8px;border-radius:8px;border:1px solid #ddd;font-size:1.08em;">
+                    <option value="dinein">Dine In</option>
+                    <option value="takeaway">Take Away</option>
+                </select>
+                <input type="number" id="tableNumber" placeholder="Table # (auto-filled for Dine In)" min="1" max="10" required style="width:100%;margin-bottom:8px;padding:8px;border-radius:8px;border:1px solid #ddd;">
+                <input type="text" id="menuSearch" placeholder="Search menu (e.g. spicy, veg, momo)" style="width:100%;font-size:1.1em;margin-bottom:8px;padding:8px;border-radius:8px;border:1px solid #ddd;">
+                <div id="favoritesBar"></div>
+                <!-- <div id="menuGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px 8px;margin-bottom:8px;"></div> -->
+                <div style="font-size:0.95em;color:#888;margin-bottom:8px;">All prices in NPR. Menu images are for illustration.</div>
+                <textarea id="orderNote" placeholder="Special instructions (optional)" rows="2" style="width:100%;margin-bottom:8px;padding:8px;border-radius:8px;border:1px solid #ddd;"></textarea>
+                <input type="number" id="tip" placeholder="Tip (optional, NPR)" min="0" step="1" style="width:100%;margin-bottom:8px;padding:8px;border-radius:8px;border:1px solid #ddd;">
+                <button type="submit" style="background:#FF6B35;color:#fff;font-weight:600;padding:12px 0;border:none;border-radius:8px;font-size:1.08em;">Send to Kitchen</button>
+            </form>
+        </section>
+        <!-- Sticky Order Summary Pane -->
+        <div id="orderSummaryPane" style="position:fixed;left:0;right:0;bottom:0;background:#fff;box-shadow:0 -2px 14px rgba(0,0,0,0.10);padding:16px 24px;display:flex;justify-content:space-between;align-items:center;z-index:99;font-size:1.15em;font-family:'IBM Plex Sans',Arial,sans-serif;border-top:4px solid #FF6B35;min-height:64px;">
+            <div id="summaryItems">No items yet.</div>
+            <button id="summaryCheckout" style="background:#00A878;color:#fff;font-weight:600;padding:12px 24px;border:none;border-radius:8px;font-size:1.08em;">Checkout</button>
+        </div>
+        <!-- Floating Action Button Cluster (over checkout, right bottom) -->
+        <div id="fabCluster" style="position:fixed;bottom:80px;right:24px;z-index:120;display:flex;flex-direction:column;gap:16px;">
+            <button class="fab" id="fabNewOrder" title="New Order">➕</button>
+            <button class="fab" id="fabClear" title="Clear">🧹</button>
+            <button class="fab" id="fabHelp" title="Help">❓</button>
+        </div>
+        <section id="active-orders">
+            <h3>Active Orders</h3>
+            <div id="ordersList"></div>
+        </section>
+    </main>
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/waiter.js"></script>
+    <script>
+    // Show kitchen note to waiter
+    function showKitchenNote() {
+        var note = localStorage.getItem('kitchenNote') || '';
+        document.getElementById('waiterKitchenNote').textContent = note ? note : 'No note from kitchen.';
+    }
+    
+    // Debug script to check if favorites bar is working
+    document.addEventListener('DOMContentLoaded', () => {
+        showKitchenNote();
+        
+        // Debug: Check if favorites bar gets populated
+        setTimeout(() => {
+            const favBar = document.getElementById('favoritesBar');
+            console.log('Favorites bar element:', favBar);
+            console.log('Favorites bar content:', favBar ? favBar.innerHTML : 'NOT FOUND');
+            console.log('Menu data:', getMenu ? getMenu() : 'getMenu not available');
+            
+            // If favorites bar is empty, try to manually trigger renderMenu
+            if (favBar && favBar.innerHTML.trim() === '') {
+                console.log('Favorites bar is empty, trying to render menu...');
+                if (typeof renderMenu === 'function') {
+                    renderMenu();
+                } else {
+                    console.log('renderMenu function not available');
+                }
+            }
+        }, 1000);
+    });
+    </script>
+</body>
+</html>

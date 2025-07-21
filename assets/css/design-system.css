@@ -1,0 +1,54 @@
+body {
+  font-family: 'IBM Plex Sans', Arial, sans-serif;
+  background: #F5F5F7;
+  color: #222;
+  margin: 0; padding: 0;
+}
+header { padding: 24px 0 16px 0; text-align: center; }
+.color-row { display: flex; gap: 16px; margin: 16px 0; }
+.color-swatch {
+  min-width: 110px; min-height: 60px;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  padding: 12px;
+}
+.color-swatch.primary { background: #FF6B35; color: #fff; }
+.color-swatch.secondary { background: #004E89; color: #fff; }
+.color-swatch.alert { background: #EF3E36; color: #fff; }
+.color-swatch.success { background: #00A878; color: #fff; }
+.color-swatch.gray { background: #F5F5F7; color: #444; border: 1px solid #ddd; }
+.font-sample { margin: 8px 0; }
+.btn {
+  font-family: inherit;
+  font-size: 1.05em;
+  padding: 10px 26px;
+  border: none;
+  border-radius: 8px;
+  margin: 0 8px 8px 0;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+}
+.btn.primary { background: #FF6B35; color: #fff; }
+.btn.secondary { background: #004E89; color: #fff; }
+.btn.alert { background: #EF3E36; color: #fff; }
+.btn.success { background: #00A878; color: #fff; }
+.spacing-demo { margin: 16px 0; }
+.space-box {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+.contrast-row { display: flex; gap: 16px; margin: 16px 0; }
+.contrast.kitchen {
+  background: #222; color: #fff; padding: 16px 32px; border-radius: 8px; font-size: 1.1em; border: 2px solid #FF6B35;
+}
+.contrast.admin {
+  background: #fff; color: #004E89; padding: 16px 32px; border-radius: 8px; font-size: 1.1em; border: 2px solid #004E89;
+}

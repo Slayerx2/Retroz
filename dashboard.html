@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Cafe Order System</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <header>
+        <h2>Admin Dashboard</h2>
+        <button onclick="window.location.href='index.html'">Logout</button>
+        <button id="menuMgmtBtn" style="background:#FF6B35;color:#fff;font-weight:600;padding:8px 16px;border:none;border-radius:8px;margin-left:12px;">Menu Management</button>
+    </header>
+    <main>
+        <section>
+            <h3>All Orders</h3>
+            <div id="allOrdersList"></div>
+            <div style="font-size:0.95em;color:#888;margin-bottom:0.5em;">All prices in NPR. Menu images are for illustration.</div>
+        </section>
+        <section>
+            <h3>Menu Management</h3>
+            <div id="menuManagement"></div>
+        </section>
+        <section>
+            <h3>Tips Tracking</h3>
+            <div id="tipsTracking"></div>
+        </section>
+    </main>
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+    <script>
+    document.getElementById('menuMgmtBtn').onclick = function() {
+        var section = document.querySelector('section h3:nth-of-type(2)').parentElement;
+        section.scrollIntoView({behavior:'smooth', block:'center'});
+        section.style.boxShadow = '0 0 0 4px #FF6B35, 0 2px 12px rgba(0,0,0,0.10)';
+        setTimeout(function() {
+            section.style.boxShadow = '';
+        }, 1800);
+    };
+    </script>
+</body>
+</html>

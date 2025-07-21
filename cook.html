@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cook - Cafe Order System</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <header>
+        <h2>Kitchen Panel</h2>
+        <button onclick="window.location.href='index.html'">Logout</button>
+    </header>
+    <main>
+        <section id="kitchen-orders">
+            <h3>Incoming Orders</h3>
+            <div id="kitchenOrdersList"></div>
+            <div style="font-size:0.95em;color:#888;margin-bottom:0.5em;">All prices in NPR. Menu images are for illustration.</div>
+        </section>
+        <section id="kitchen-notes" style="margin-top:2em;">
+            <h3>Note to Waiter</h3>
+            <form id="noteForm" style="display:flex;flex-direction:column;gap:0.7em;">
+                <textarea id="kitchenNote" rows="3" placeholder="E.g. Out of chicken momo, use fresh basil only, etc." style="font-size:1.1em;padding:0.7em;border-radius:8px;border:1px solid #bbb;"></textarea>
+                <button type="submit" style="width:fit-content;background:#FF6B35;color:#fff;font-weight:600;padding:0.5em 1.2em;border:none;border-radius:8px;">Save Note</button>
+            </form>
+            <div id="latestNote" style="margin-top:1em;color:#fff;background:#222;padding:0.8em 1em;border-radius:10px;min-height:2.2em;"></div>
+        </section>
+    </main>
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/cook.js"></script>
+    <script>
+    // Kitchen note logic
+    function loadNote() {
+        const note = localStorage.getItem('kitchenNote') || '';
+        document.getElementById('latestNote').textContent = note ? 'Chef says: ' + note : 'No note for waiter.';
+        document.getElementById('kitchenNote').value = note;
+    }
+    document.getElementById('noteForm').onsubmit = function(e) {
+        e.preventDefault();
+        const note = document.getElementById('kitchenNote').value.trim();
+        localStorage.setItem('kitchenNote', note);
+        loadNote();
+    };
+    document.addEventListener('DOMContentLoaded', loadNote);
+    </script>
+</body>
+</html>

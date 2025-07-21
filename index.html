@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CaféPOS</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script defer src="assets/js/script.js"></script>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">☕ CaféPOS</div>
+      <ul class="nav-links">
+        <li><strong id="user-role"></strong></li>
+        <li><a href="#" onclick="logout()">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Waiter Panel -->
+    <section id="waiter-section" class="role-section">
+      <h2>Waiter Panel</h2>
+
+      <form id="order-form">
+        <label>Table No:
+          <input type="number" id="table" required />
+        </label>
+
+        <h3>Menu</h3>
+        <div id="menu-items" class="menu-grid">
+          <!-- Menu buttons will be added by JS -->
+        </div>
+
+        <h4>Selected Items:</h4>
+        <ul id="selected-items-list"></ul>
+
+        <button type="submit">Place Order</button>
+      </form>
+    </section>
+
+    <!-- Cook Panel -->
+    <section id="cook-section" class="role-section">
+      <h2 class="panel-title">Kitchen Panel</h2>
+      <div id="kitchen-orders"></div>
+    </section>
+    
+    <!-- Admin Dashboard -->
+    <section id="admin-section" class="role-section">
+      <h2 class="panel-title">Admin Dashboard</h2>
+      <div id="order-stats"></div>
+    </section>
+  </main>
+
+  <script>
+    function logout() {
+      localStorage.removeItem('user');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>

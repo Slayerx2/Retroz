@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - CaféPOS</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,600&display=swap" rel="stylesheet">
+  <script defer src="assets/js/auth.js"></script>
+</head>
+<body>
+  <main class="login-container" style="max-width:350px;margin:3em auto;background:#232323;padding:2em;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.11);color:#fff;font-family:'IBM Plex Sans',Arial,sans-serif;">
+    <div style="text-align:center;margin-bottom:1.2em;font-size:2em;font-weight:600;letter-spacing:0.01em;">☕ CaféPOS</div>
+    <h1 style="font-size:1.5em;text-align:center;margin-bottom:1em;font-weight:600;">Login</h1>
+    <form id="login-form" autocomplete="off" novalidate>
+      <label for="username" style="font-weight:600;">Username</label>
+      <input type="text" id="username" required aria-required="true" aria-label="Username" style="width:100%;padding:0.7em;margin-bottom:1em;border-radius:8px;border:1px solid #bbb;" autocomplete="username" />
+      <label for="password" style="font-weight:600;">Password</label>
+      <input type="password" id="password" required aria-required="true" aria-label="Password" style="width:100%;padding:0.7em;margin-bottom:1em;border-radius:8px;border:1px solid #bbb;" autocomplete="current-password" />
+      <label for="role" style="font-weight:600;">Select Role</label>
+      <select id="role" required aria-required="true" aria-label="Select Role" style="width:100%;padding:0.7em;margin-bottom:1.2em;border-radius:8px;border:1px solid #bbb;">
+        <option value="waiter">Waiter</option>
+        <option value="cook">Cook</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button type="submit" style="width:100%;background:#FF6B35;color:#fff;font-weight:600;padding:0.8em 0;border:none;border-radius:8px;font-size:1.08em;">Login</button>
+      <div id="error-msg" style="color:#EF3E36;margin-top:1em;min-height:1.2em;text-align:center;"></div>
+    </form>
+  </main>
+</body>
+</html>
