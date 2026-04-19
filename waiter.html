@@ -17,7 +17,7 @@
         </svg>
         <span class="brand-title">Cafe POS</span>
       </div>
-      <button onclick="window.location.href='index.html'" style="float:right;">Logout</button>
+      <button onclick="logout()" style="float:right;">Logout</button>
     </header>
     <main>
         <section id="table-panel">
@@ -93,6 +93,12 @@
             }
         }, 1000);
     });
+    
+    function logout() {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+    }
     </script>
 </body>
 </html>

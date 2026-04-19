@@ -9,9 +9,16 @@
 <body>
     <header>
         <h2>Admin Dashboard</h2>
-        <button onclick="window.location.href='index.html'">Logout</button>
+        <button onclick="logout()">Logout</button>
         <button id="menuMgmtBtn" style="background:#FF6B35;color:#fff;font-weight:600;padding:8px 16px;border:none;border-radius:8px;margin-left:12px;">Menu Management</button>
     </header>
+    <script>
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+    </script>
     <main>
         <section>
             <h3>All Orders</h3>
