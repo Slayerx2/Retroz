@@ -1,10 +1,4 @@
-const users = [
-  { username: 'admin', password: 'admin123', role: 'admin' },
-  { username: 'waiter1', password: 'waiter123', role: 'waiter' },
-  { username: 'cook1', password: 'cook123', role: 'cook' }
-];
-
-document.getElementById('login-form').addEventListener('submit', function (e) {
+document.getElementById('login-form').addEventListener('submit', async function (e) {
   e.preventDefault();
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
@@ -27,22 +21,35 @@ document.getElementById('login-form').addEventListener('submit', function (e) {
     return;
   }
 
-  const user = users.find(
-    u => u.username === username && u.password === password && u.role === role
-  );
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, password, role })
+    });
 
-  if (user) {
-    localStorage.setItem('user', JSON.stringify({ username, role }));
-    if (role === 'waiter') {
-      window.location.href = 'waiter.html';
-    } else if (role === 'cook') {
-      window.location.href = 'cook.html';
-    } else if (role === 'admin') {
-      window.location.href = 'dashboard.html';
+    const data = await response.json();
+
+    if (data.success) {
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('token', data.token);
+      
+      if (role === 'waiter') {
+        window.location.href = 'waiter.html';
+      } else if (role === 'cook') {
+        window.location.href = 'cook.html';
+      } else if (role === 'admin') {
+        window.location.href = 'dashboard.html';
+      } else {
+        window.location.href = 'index.html';
+      }
     } else {
-      window.location.href = 'index.html';
+      errorDiv.textContent = data.error || 'Invalid credentials.';
     }
-  } else {
-    errorDiv.textContent = 'Invalid credentials.';
+  } catch (error) {
+    console.error('Login error:', error);
+    errorDiv.textContent = 'Network error. Please try again.';
   }
 });
