@@ -1,0 +1,65 @@
+/* Kitchen-specific styles */
+
+.kitchen-orders {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.order-status {
+  background: #fff;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+.order-status.status-pending {
+  border-left: 4px solid #ffccbc;
+}
+
+.order-status.status-preparing {
+  border-left: 4px solid #ffe082;
+}
+
+.order-status.status-ready {
+  border-left: 4px solid #b2ff59;
+}
+
+#kitchen-notes {
+  margin-top: 2em;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#kitchen-notes form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+}
+
+#kitchen-notes textarea {
+  font-size: 1.1em;
+  padding: 0.7em;
+  border-radius: 8px;
+  border: 1px solid #bbb;
+}
+
+#kitchen-notes button {
+  width: fit-content;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.5em 1.2em;
+  border: none;
+  border-radius: 8px;
+}
+
+#latestNote {
+  margin-top: 1em;
+  color: #fff;
+  background: #222;
+  padding: 0.8em 1em;
+  border-radius: 10px;
+  min-height: 2.2em;
+}

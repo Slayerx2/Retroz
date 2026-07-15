@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - CaféPOS</title>
+</head>
+<body>
+  <h1>Project Reorganization Test</h1>
+  <div id="test-results"></div>
+  
+  <script>
+    const results = document.getElementById('test-results');
+    
+    function testFile(path, description) {
+      const img = new Image();
+      img.onload = () => {
+        results.innerHTML += `<div style="color:green">✓ ${description}: ${path}</div>`;
+      };
+      img.onerror = () => {
+        results.innerHTML += `<div style="color:red">✗ ${description}: ${path}</div>`;
+      };
+      img.src = path;
+    }
+    
+    function testScript(path, description) {
+      const script = document.createElement('script');
+      script.onload = () => {
+        results.innerHTML += `<div style="color:green">✓ ${description}: ${path}</div>`;
+      };
+      script.onerror = () => {
+        results.innerHTML += `<div style="color:red">✗ ${description}: ${path}</div>`;
+      };
+      script.src = path;
+      document.head.appendChild(script);
+    }
+    
+    function testCSS(path, description) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.onload = () => {
+        results.innerHTML += `<div style="color:green">✓ ${description}: ${path}</div>`;
+      };
+      link.onerror = () => {
+        results.innerHTML += `<div style="color:red">✗ ${description}: ${path}</div>`;
+      };
+      link.href = path;
+      document.head.appendChild(link);
+    }
+    
+    results.innerHTML = '<h2>Testing File Paths:</h2>';
+    
+    // Test CSS files
+    testCSS('css/variables.css', 'CSS Variables');
+    testCSS('css/base.css', 'CSS Base');
+    testCSS('css/components.css', 'CSS Components');
+    testCSS('css/login.css', 'CSS Login');
+    testCSS('css/waiter.css', 'CSS Waiter');
+    testCSS('css/kitchen.css', 'CSS Kitchen');
+    testCSS('css/admin.css', 'CSS Admin');
+    testCSS('css/responsive.css', 'CSS Responsive');
+    
+    // Test JS files
+    testScript('js/config.js', 'JS Config');
+    testScript('js/storage.js', 'JS Storage');
+    testScript('js/utils.js', 'JS Utils');
+    testScript('js/auth.js', 'JS Auth');
+    testScript('js/common.js', 'JS Common');
+    testScript('js/ui.js', 'JS UI');
+    testScript('js/login.js', 'JS Login');
+    testScript('js/waiter.js', 'JS Waiter');
+    testScript('js/kitchen.js', 'JS Kitchen');
+    testScript('js/admin.js', 'JS Admin');
+    
+    // Test HTML pages
+    results.innerHTML += '<h2>HTML Pages (check manually):</h2>';
+    results.innerHTML += '<div><a href="pages/login.html" target="_blank">pages/login.html</a></div>';
+    results.innerHTML += '<div><a href="pages/waiter.html" target="_blank">pages/waiter.html</a></div>';
+    results.innerHTML += '<div><a href="pages/kitchen.html" target="_blank">pages/kitchen.html</a></div>';
+    results.innerHTML += '<div><a href="pages/admin.html" target="_blank">pages/admin.html</a></div>';
+    
+    // Test images
+    results.innerHTML += '<h2>Images:</h2>';
+    testFile('assets/img/cappuccino.png', 'Cappuccino Image');
+    testFile('assets/img/espresso.png', 'Espresso Image');
+    testFile('assets/img/salad.png', 'Salad Image');
+    testFile('assets/img/sandwich.png', 'Sandwich Image');
+  </script>
+</body>
+</html>

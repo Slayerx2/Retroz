@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen - Cafe Order System</title>
+    <link rel="stylesheet" href="../css/variables.css" />
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/components.css" />
+    <link rel="stylesheet" href="../css/kitchen.css" />
+    <link rel="stylesheet" href="../css/responsive.css" />
+</head>
+<body>
+    <header>
+        <h2>Kitchen Panel</h2>
+        <button id="logoutBtn">Logout</button>
+    </header>
+    <main>
+        <section id="kitchen-orders">
+            <h3>Incoming Orders</h3>
+            <div id="kitchenOrdersList"></div>
+            <div class="price-disclaimer">All prices in NPR. Menu images are for illustration.</div>
+        </section>
+        <section id="kitchen-notes">
+            <h3>Note to Waiter</h3>
+            <form id="noteForm">
+                <textarea id="kitchenNote" rows="3" placeholder="E.g. Out of chicken momo, use fresh basil only, etc."></textarea>
+                <button type="submit">Save Note</button>
+            </form>
+            <div id="latestNote"></div>
+        </section>
+    </main>
+    <script src="../js/config.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/ui.js"></script>
+    <script src="../js/kitchen.js"></script>
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', Auth.logout);
+    </script>
+</body>
+</html>

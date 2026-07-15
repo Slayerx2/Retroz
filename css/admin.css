@@ -1,0 +1,60 @@
+/* Admin-specific styles */
+
+#analyticsPanel {
+  background: var(--white);
+  padding: 1.5em;
+  margin-bottom: 1.5em;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+#analyticsPanel h3 {
+  color: var(--primary);
+  margin-bottom: 1em;
+}
+
+#analyticsPanel div {
+  margin: 0.5em 0;
+  font-size: 1.1em;
+}
+
+#menuManagement {
+  max-width: 800px;
+}
+
+#menuManagement > div {
+  background: #fff;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.toggle-availability {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5em 1em;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.toggle-availability:hover {
+  background: #e65c24;
+}
+
+#tipsTracking {
+  background: var(--white);
+  padding: 1.5em;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+#tipsTracking strong {
+  font-size: 1.2em;
+  color: var(--primary);
+}

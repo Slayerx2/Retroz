@@ -1,0 +1,80 @@
+/* Responsive Design */
+
+@media (max-width: 600px) {
+  main {
+    padding: 0.5em;
+  }
+  
+  header {
+    padding: 0.8em 1em;
+  }
+  
+  .brand-logo {
+    font-size: 1.1em;
+  }
+  
+  header button {
+    padding: 0.5em 1em;
+    font-size: 0.95em;
+  }
+  
+  #favoritesBar {
+    padding: 10px 4vw 6px 4vw;
+    border-radius: 12px;
+  }
+  
+  .fav-section-row {
+    gap: 7px;
+  }
+  
+  .fav-btn {
+    min-width: 80px;
+    font-size: 1em;
+    padding: 0.38em 0.7em;
+  }
+  
+  #tablesGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  #menuGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  #orderSummaryPane {
+    padding: 12px 16px;
+    font-size: 1em;
+  }
+  
+  #orderSummaryPane button {
+    padding: 10px 16px;
+    font-size: 1em;
+  }
+  
+  .fab {
+    width: 48px;
+    height: 48px;
+    font-size: 1.3em;
+  }
+  
+  #fabCluster {
+    bottom: 70px;
+    right: 16px;
+  }
+}
+
+@media (max-width: 400px) {
+  #tablesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .login-container {
+    margin: 2em auto;
+    padding: 1.5em;
+  }
+  
+  .fav-btn {
+    min-width: 70px;
+    font-size: 0.9em;
+  }
+}
