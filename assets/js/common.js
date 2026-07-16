@@ -1,6 +1,10 @@
-// Shared data and logic (menu, orders, etc.)
+// Shared logic for order storage and syncing (localStorage-based mock)
 
-// Nepali Café & Restaurant Menu
+const ORDER_KEY = 'cafe_orders';
+const MENU_KEY = 'cafe_menu';
+const USER_KEY = 'cafe_user';
+
+// Nepali Café & Restaurant Menu (no icons)
 const defaultMenu = [
   // Veg
   { id: 1, name: 'Veg Momo', price: 120, available: true },
@@ -43,81 +47,57 @@ const defaultMenu = [
   { id: 34, name: 'Kheer', price: 60, available: true }
 ];
 
-// Menu operations
-const Menu = {
-  get() {
-    let menu = Storage.get(CONFIG.STORAGE_KEYS.MENU);
+function getMenu() {
+    let menu = JSON.parse(localStorage.getItem(MENU_KEY));
     if (!menu) {
-      menu = defaultMenu;
-      Storage.set(CONFIG.STORAGE_KEYS.MENU, menu);
+        menu = defaultMenu;
+        localStorage.setItem(MENU_KEY, JSON.stringify(menu));
     }
     return menu;
-  },
+}
 
-  set(menu) {
-    Storage.set(CONFIG.STORAGE_KEYS.MENU, menu);
+function setMenu(menu) {
+    localStorage.setItem(MENU_KEY, JSON.stringify(menu));
     window.dispatchEvent(new Event('menu_updated'));
-  },
+}
 
-  updateAvailability(id, available) {
-    const menu = this.get();
-    const idx = menu.findIndex(item => item.id === id);
-    if (idx !== -1) {
-      menu[idx].available = available;
-      this.set(menu);
-    }
-  }
-};
+function getOrders() {
+    return JSON.parse(localStorage.getItem(ORDER_KEY) || '[]');
+}
 
-// Order operations
-const Orders = {
-  get() {
-    return Storage.get(CONFIG.STORAGE_KEYS.ORDERS, []);
-  },
-
-  set(orders) {
-    Storage.set(CONFIG.STORAGE_KEYS.ORDERS, orders);
+function saveOrders(orders) {
+    localStorage.setItem(ORDER_KEY, JSON.stringify(orders));
     window.dispatchEvent(new Event('orders_updated'));
-  },
+}
 
-  add(order) {
-    const orders = this.get();
+function addOrder(order) {
+    const orders = getOrders();
     orders.push(order);
-    this.set(orders);
-  },
+    saveOrders(orders);
+}
 
-  updateStatus(orderId, status) {
-    const orders = this.get();
+// Helper to get today's orders
+function getTodaysOrders() {
+    const today = new Date().toISOString().slice(0, 10);
+    return getOrders().filter(o => o.createdAt && o.createdAt.startsWith(today));
+}
+
+function updateOrderStatus(orderId, status) {
+    const orders = getOrders();
     const idx = orders.findIndex(o => o.id === orderId);
     if (idx !== -1) {
-      orders[idx].status = status;
-      if (status === 'ready') orders[idx].readyAt = new Date().toISOString();
-      if (status === 'completed') orders[idx].completedAt = new Date().toISOString();
-      this.set(orders);
+        orders[idx].status = status;
+        if(status === 'ready') orders[idx].readyAt = new Date().toISOString();
+        if(status === 'completed') orders[idx].completedAt = new Date().toISOString();
+        saveOrders(orders);
     }
-  },
+}
 
-  getTodaysOrders() {
-    const today = Utils.getTodayDate();
-    return this.get().filter(o => o.createdAt && o.createdAt.startsWith(today));
-  },
+function getUser() {
+    return JSON.parse(localStorage.getItem(USER_KEY) || '{}');
+}
 
-  getActiveOrders() {
-    return this.get().filter(o => o.status !== 'completed');
-  },
-
-  getByTable(tableNumber) {
-    return this.get().filter(o => o.table === tableNumber && o.status !== 'completed');
-  }
-};
-
-// Kitchen note operations
-const KitchenNote = {
-  get() {
-    return Storage.get(CONFIG.STORAGE_KEYS.KITCHEN_NOTE, '');
-  },
-
-  set(note) {
-    Storage.set(CONFIG.STORAGE_KEYS.KITCHEN_NOTE, note);
-  }
-};
+function logout() {
+    localStorage.removeItem(USER_KEY);
+    window.location.href = 'index.html';
+}
