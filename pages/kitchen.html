@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kitchen - Cafe Order System</title>
+    <title>Kitchen - CaféPOS</title>
     <link rel="stylesheet" href="../css/variables.css" />
     <link rel="stylesheet" href="../css/base.css" />
     <link rel="stylesheet" href="../css/components.css" />
@@ -12,33 +12,94 @@
 </head>
 <body>
     <header>
-        <h2>Kitchen Panel</h2>
-        <button id="logoutBtn">Logout</button>
+        <div class="brand-logo">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:10px;">
+                <ellipse cx="18" cy="18" rx="18" ry="18" fill="#FF6B35"/>
+                <path d="M12 24c0 2 2.5 3 6 3s6-1 6-3v-6h-12v6z" fill="#fff"/>
+                <path d="M24 18c0-2.5-2.5-4-6-4s-6 1.5-6 4" stroke="#fff" stroke-width="2" fill="none"/>
+                <ellipse cx="18" cy="14" rx="4" ry="1.5" fill="#fff"/>
+            </svg>
+            <span class="brand-title">CaféPOS - Kitchen</span>
+        </div>
+        <div class="header-controls">
+            <button id="soundToggleBtn" class="icon-btn" title="Toggle Sound">
+                🔊
+            </button>
+            <button id="logoutBtn">Logout</button>
+        </div>
     </header>
-    <main>
-        <section id="kitchen-orders">
-            <h3>Incoming Orders</h3>
-            <div id="kitchenOrdersList"></div>
-            <div class="price-disclaimer">All prices in NPR. Menu images are for illustration.</div>
+    <main class="kitchen-display">
+        <!-- Kitchen Announcement -->
+        <section class="kitchen-announcement-section">
+            <div id="kitchenAnnouncement" class="kitchen-announcement">
+                <span class="announcement-label">📢 Kitchen Announcement:</span>
+                <span id="announcementText">No announcements</span>
+            </div>
+            <button id="editAnnouncementBtn" class="edit-btn">Edit</button>
         </section>
-        <section id="kitchen-notes">
-            <h3>Note to Waiter</h3>
-            <form id="noteForm">
-                <textarea id="kitchenNote" rows="3" placeholder="E.g. Out of chicken momo, use fresh basil only, etc."></textarea>
-                <button type="submit">Save Note</button>
-            </form>
-            <div id="latestNote"></div>
+
+        <!-- Kitchen Orders Board -->
+        <section class="kitchen-board">
+            <div class="kitchen-column" id="new-column">
+                <div class="column-header">
+                    <h3>New</h3>
+                    <span class="order-count" id="new-count">0</span>
+                </div>
+                <div class="column-content" id="new-orders">
+                    <div class="empty-state">No new orders</div>
+                </div>
+            </div>
+
+            <div class="kitchen-column" id="preparing-column">
+                <div class="column-header">
+                    <h3>Preparing</h3>
+                    <span class="order-count" id="preparing-count">0</span>
+                </div>
+                <div class="column-content" id="preparing-orders">
+                    <div class="empty-state">No orders preparing</div>
+                </div>
+            </div>
+
+            <div class="kitchen-column" id="ready-column">
+                <div class="column-header">
+                    <h3>Ready</h3>
+                    <span class="order-count" id="ready-count">0</span>
+                </div>
+                <div class="column-content" id="ready-orders">
+                    <div class="empty-state">No orders ready</div>
+                </div>
+            </div>
         </section>
     </main>
+
+    <!-- Edit Announcement Modal -->
+    <div id="announcementModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Edit Kitchen Announcement</h2>
+            <textarea id="announcementInput" rows="3" placeholder="Enter announcement for all staff..."></textarea>
+            <div class="modal-actions">
+                <button type="button" id="saveAnnouncementBtn" class="btn-primary">Save</button>
+                <button type="button" id="cancelAnnouncementBtn" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" style="display: none;"></div>
+
     <script src="../js/config.js"></script>
     <script src="../js/storage.js"></script>
     <script src="../js/utils.js"></script>
-    <script src="../js/auth.js"></script>
     <script src="../js/common.js"></script>
     <script src="../js/ui.js"></script>
     <script src="../js/kitchen.js"></script>
     <script>
-        document.getElementById('logoutBtn').addEventListener('click', Auth.logout);
+        // Route protection: only cooks can access this page
+        if (!requireRole(['cook'])) {
+            // Redirect happens in requireRole
+        }
+        
+        document.getElementById('logoutBtn').addEventListener('click', logout);
     </script>
 </body>
 </html>

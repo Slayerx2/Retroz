@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Cafe Order System</title>
+    <title>Admin - CaféPOS</title>
     <link rel="stylesheet" href="../css/variables.css" />
     <link rel="stylesheet" href="../css/base.css" />
     <link rel="stylesheet" href="../css/components.css" />
@@ -11,35 +11,343 @@
     <link rel="stylesheet" href="../css/responsive.css" />
 </head>
 <body>
-    <header>
-        <h2>Admin Dashboard</h2>
-        <button id="logoutBtn">Logout</button>
-        <button id="menuMgmtBtn">Menu Management</button>
-    </header>
-    <main>
-        <section>
-            <h3>All Orders</h3>
-            <div id="allOrdersList"></div>
-            <div class="price-disclaimer">All prices in NPR. Menu images are for illustration.</div>
-        </section>
-        <section>
-            <h3>Menu Management</h3>
-            <div id="menuManagement"></div>
-        </section>
-        <section>
-            <h3>Tips Tracking</h3>
-            <div id="tipsTracking"></div>
-        </section>
-    </main>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:8px;">
+                        <ellipse cx="18" cy="18" rx="18" ry="18" fill="#FF6B35"/>
+                        <path d="M12 24c0 2 2.5 3 6 3s6-1 6-3v-6h-12v6z" fill="#fff"/>
+                        <path d="M24 18c0-2.5-2.5-4-6-4s-6 1.5-6 4" stroke="#fff" stroke-width="2" fill="none"/>
+                        <ellipse cx="18" cy="14" rx="4" ry="1.5" fill="#fff"/>
+                    </svg>
+                    <span class="brand-title">CaféPOS</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-section="overview">
+                    <span>📊</span> Overview
+                </button>
+                <button class="nav-item" data-section="orders">
+                    <span>📋</span> Orders
+                </button>
+                <button class="nav-item" data-section="menu">
+                    <span>🍽️</span> Menu
+                </button>
+                <button class="nav-item" data-section="tables">
+                    <span>🪑</span> Tables
+                </button>
+                <button class="nav-item" data-section="staff">
+                    <span>👥</span> Staff
+                </button>
+                <button class="nav-item" data-section="reports">
+                    <span>📈</span> Reports
+                </button>
+                <button class="nav-item" data-section="audit">
+                    <span>📝</span> Audit Logs
+                </button>
+                <button class="nav-item" data-section="settings">
+                    <span>⚙️</span> Settings
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="logout-btn">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1 id="pageTitle">Overview</h1>
+                <div class="header-info">
+                    <span id="currentDate"></span>
+                </div>
+            </header>
+
+            <!-- Overview Section -->
+            <section id="overview-section" class="content-section active">
+                <div class="metrics-grid" id="metricsGrid"></div>
+            </section>
+
+            <!-- Orders Section -->
+            <section id="orders-section" class="content-section">
+                <div class="section-toolbar">
+                    <input type="text" id="orderSearch" placeholder="Search orders..." />
+                    <select id="orderDateFilter">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="week">Last 7 Days</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                    <select id="orderStatusFilter">
+                        <option value="all">All Status</option>
+                        <option value="sent">Sent</option>
+                        <option value="preparing">Preparing</option>
+                        <option value="ready">Ready</option>
+                        <option value="served">Served</option>
+                        <option value="paid">Paid</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <select id="orderTypeFilter">
+                        <option value="all">All Types</option>
+                        <option value="dinein">Dine In</option>
+                        <option value="takeaway">Take Away</option>
+                    </select>
+                    <select id="orderWaiterFilter">
+                        <option value="all">All Waiters</option>
+                    </select>
+                </div>
+                <div id="ordersList" class="orders-list"></div>
+            </section>
+
+            <!-- Menu Section -->
+            <section id="menu-section" class="content-section">
+                <div class="section-toolbar">
+                    <input type="text" id="menuSearch" placeholder="Search menu items..." />
+                    <select id="menuCategoryFilter">
+                        <option value="all">All Categories</option>
+                        <option value="veg">Veg</option>
+                        <option value="non-veg">Non-Veg</option>
+                        <option value="snacks">Snacks</option>
+                        <option value="drinks">Drinks</option>
+                        <option value="bakery">Bakery & Sweets</option>
+                    </select>
+                    <button id="addMenuItemBtn" class="btn-primary">Add Item</button>
+                </div>
+                <div id="menuList" class="menu-list"></div>
+            </section>
+
+            <!-- Tables Section -->
+            <section id="tables-section" class="content-section">
+                <div class="section-toolbar">
+                    <button id="addTableBtn" class="btn-primary">Add Table</button>
+                </div>
+                <div id="tablesList" class="tables-list"></div>
+            </section>
+
+            <!-- Staff Section -->
+            <section id="staff-section" class="content-section">
+                <div id="staffList" class="staff-list"></div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports-section" class="content-section">
+                <div class="section-toolbar">
+                    <select id="reportDateRange">
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="week">Last 7 Days</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                    <button id="exportCsvBtn" class="btn-secondary">Export CSV</button>
+                </div>
+                <div id="reportsContent" class="reports-content"></div>
+            </section>
+
+            <!-- Audit Logs Section -->
+            <section id="audit-section" class="content-section">
+                <div class="section-toolbar">
+                    <select id="auditActionFilter">
+                        <option value="all">All Actions</option>
+                        <option value="login">Login</option>
+                        <option value="logout">Logout</option>
+                        <option value="order_created">Order Created</option>
+                        <option value="status_changed">Status Changed</option>
+                        <option value="payment_completed">Payment Completed</option>
+                        <option value="menu_item_created">Menu Item Created</option>
+                        <option value="menu_item_edited">Menu Item Edited</option>
+                        <option value="availability_changed">Availability Changed</option>
+                        <option value="settings_changed">Settings Changed</option>
+                    </select>
+                    <select id="auditEntityTypeFilter">
+                        <option value="all">All Entities</option>
+                        <option value="order">Order</option>
+                        <option value="product">Product</option>
+                        <option value="session">Session</option>
+                        <option value="settings">Settings</option>
+                    </select>
+                </div>
+                <div id="auditLogsContent" class="audit-logs-content"></div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings-section" class="content-section">
+                <div class="settings-form">
+                    <div class="form-group">
+                        <label>Café Name</label>
+                        <input type="text" id="cafeName" />
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea id="cafeAddress" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" id="cafePhone" />
+                    </div>
+                    <div class="form-group">
+                        <label>Currency</label>
+                        <input type="text" id="currency" />
+                    </div>
+                    <div class="form-group">
+                        <label>VAT Percentage (%)</label>
+                        <input type="number" id="vatRate" step="0.1" />
+                    </div>
+                    <div class="form-group">
+                        <label>Service Charge Percentage (%)</label>
+                        <input type="number" id="serviceChargeRate" step="0.1" />
+                    </div>
+                    <div class="form-group">
+                        <label>Receipt Footer</label>
+                        <textarea id="receiptFooter" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Kitchen Warning Time (minutes)</label>
+                        <input type="number" id="kitchenWarningTime" />
+                    </div>
+                    <div class="form-group">
+                        <label>Kitchen Delay Time (minutes)</label>
+                        <input type="number" id="kitchenDelayTime" />
+                    </div>
+                    <div class="form-group">
+                        <label>Theme</label>
+                        <select id="themePreference">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
+                    <button id="saveSettingsBtn" class="btn-primary">Save Settings</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="orderDetailModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Order Details</h2>
+            <div id="orderDetailContent"></div>
+            <div class="modal-actions">
+                <button id="printOrderBtn" class="btn-secondary">Print Receipt</button>
+                <button id="cancelOrderBtn" class="btn-danger">Cancel Order</button>
+                <button id="closeOrderDetailBtn" class="btn-primary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="menuItemModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2 id="menuItemModalTitle">Add Menu Item</h2>
+            <form id="menuItemForm">
+                <input type="hidden" id="editItemId" />
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="itemName" required />
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="itemCategory">
+                        <option value="veg">Veg</option>
+                        <option value="non-veg">Non-Veg</option>
+                        <option value="snacks">Snacks</option>
+                        <option value="drinks">Drinks</option>
+                        <option value="bakery">Bakery & Sweets</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Price (NPR)</label>
+                    <input type="number" id="itemPrice" step="0.01" required />
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="itemDescription" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="text" id="itemImage" placeholder="https://..." />
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="itemVegetarian" />
+                        Vegetarian
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Preparation Time (minutes)</label>
+                    <input type="number" id="itemPrepTime" min="1" />
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="itemAvailable" checked />
+                        Available
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">Save</button>
+                    <button type="button" id="closeMenuItemModalBtn" class="btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="tableModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2 id="tableModalTitle">Add Table</h2>
+            <form id="tableForm">
+                <input type="hidden" id="editTableId" />
+                <div class="form-group">
+                    <label>Table Number/Name</label>
+                    <input type="text" id="tableName" required />
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="tableEnabled" checked />
+                        Enabled
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">Save</button>
+                    <button type="button" id="closeTableModalBtn" class="btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="cancelOrderModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Cancel Order</h2>
+            <p>Are you sure you want to cancel this order?</p>
+            <div class="form-group">
+                <label>Reason for cancellation</label>
+                <textarea id="cancelReason" rows="3" required></textarea>
+            </div>
+            <div class="modal-actions">
+                <button id="confirmCancelBtn" class="btn-danger">Confirm Cancel</button>
+                <button id="closeCancelModalBtn" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast" style="display: none;"></div>
+
     <script src="../js/config.js"></script>
     <script src="../js/storage.js"></script>
     <script src="../js/utils.js"></script>
-    <script src="../js/auth.js"></script>
     <script src="../js/common.js"></script>
     <script src="../js/ui.js"></script>
-    <script src="../js/admin.js"></script>
+    <script src="../js/dashboard.js"></script>
     <script>
-        document.getElementById('logoutBtn').addEventListener('click', Auth.logout);
+        // Route protection: only admins can access this page
+        if (!requireRole(['admin'])) {
+            // Redirect happens in requireRole
+        }
+        
+        document.getElementById('logoutBtn').addEventListener('click', logout);
     </script>
 </body>
 </html>

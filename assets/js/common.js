@@ -1,8 +1,10 @@
 // Shared logic for order storage and syncing (localStorage-based mock)
+// Updated to use new StorageService for better data management
 
-const ORDER_KEY = 'cafe_orders';
-const MENU_KEY = 'cafe_menu';
-const USER_KEY = 'cafe_user';
+// Load storage service first
+const script = document.createElement('script');
+script.src = 'storage-service.js';
+document.head.appendChild(script);
 
 // Nepali Café & Restaurant Menu (no icons)
 const defaultMenu = [
@@ -47,26 +49,138 @@ const defaultMenu = [
   { id: 34, name: 'Kheer', price: 60, available: true }
 ];
 
+// Wrapper functions for backward compatibility
 function getMenu() {
-    let menu = JSON.parse(localStorage.getItem(MENU_KEY));
+    // Try to use new storage service first, fall back to old method
+    if (typeof StorageService !== 'undefined' && StorageService.getProducts) {
+        const products = StorageService.getProducts();
+        if (products.length > 0) {
+            return products.map(p => ({
+                id: p.id,
+                name: p.name,
+                price: p.price,
+                available: p.available,
+                category: p.category,
+                desc: p.description,
+                img: p.imageUrl,
+                vegetarian: p.vegetarian,
+                prepTime: p.preparationTime
+            }));
+        }
+    }
+    
+    // Fall back to old method
+    let menu = JSON.parse(localStorage.getItem('cafe_menu'));
     if (!menu) {
         menu = defaultMenu;
-        localStorage.setItem(MENU_KEY, JSON.stringify(menu));
+        localStorage.setItem('cafe_menu', JSON.stringify(menu));
     }
     return menu;
 }
 
 function setMenu(menu) {
-    localStorage.setItem(MENU_KEY, JSON.stringify(menu));
+    // Try to use new storage service first
+    if (typeof StorageService !== 'undefined' && StorageService.setProducts) {
+        const products = menu.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            available: item.available,
+            category: item.category || 'other',
+            description: item.desc || '',
+            imageUrl: item.img || '',
+            vegetarian: item.vegetarian || false,
+            preparationTime: item.prepTime || 0,
+            archived: item.archived || false
+        }));
+        StorageService.setProducts(products);
+    } else {
+        // Fall back to old method
+        localStorage.setItem('cafe_menu', JSON.stringify(menu));
+    }
     window.dispatchEvent(new Event('menu_updated'));
 }
 
 function getOrders() {
-    return JSON.parse(localStorage.getItem(ORDER_KEY) || '[]');
+    // Try to use new storage service first
+    if (typeof StorageService !== 'undefined' && StorageService.getOrders) {
+        const orders = StorageService.getOrders();
+        // Convert to old format for compatibility
+        return orders.map(o => ({
+            id: o.id,
+            table: o.tableId,
+            orderType: o.orderType,
+            status: o.status,
+            waiter: o.waiterId,
+            items: o.items.map(item => ({
+                id: item.productId,
+                name: item.productName,
+                price: item.unitPrice,
+                quantity: item.quantity,
+                note: item.itemNote
+            })),
+            subtotal: o.subtotal,
+            vat: o.VAT,
+            serviceCharge: o.serviceCharge,
+            discount: o.discount,
+            tip: o.tip,
+            total: o.total,
+            note: o.notes,
+            createdAt: o.createdAt,
+            updatedAt: o.updatedAt,
+            readyAt: o.statusHistory.find(h => h.status === 'ready')?.timestamp,
+            completedAt: o.statusHistory.find(h => h.status === 'completed')?.timestamp,
+            paidAt: o.statusHistory.find(h => h.status === 'paid')?.timestamp,
+            cancelReason: o.statusHistory.find(h => h.status === 'cancelled')?.reason
+        }));
+    }
+    
+    // Fall back to old method
+    return JSON.parse(localStorage.getItem('cafe_orders') || '[]');
 }
 
 function saveOrders(orders) {
-    localStorage.setItem(ORDER_KEY, JSON.stringify(orders));
+    // Try to use new storage service first
+    if (typeof StorageService !== 'undefined' && StorageService.setOrders) {
+        const normalizedOrders = orders.map(order => {
+            const existingOrder = StorageService.getOrder(order.id);
+            return {
+                id: order.id,
+                orderNumber: order.orderNumber || order.id?.replace('o_', ''),
+                businessDate: order.businessDate || new Date().toISOString().split('T')[0],
+                tableId: order.table,
+                orderType: order.orderType || 'dinein',
+                status: order.status,
+                waiterId: order.waiter,
+                items: (order.items || []).map(item => ({
+                    productId: item.id,
+                    productName: item.name,
+                    unitPrice: item.price,
+                    quantity: item.quantity,
+                    itemNote: item.note || '',
+                    lineTotal: item.price * item.quantity
+                })),
+                subtotal: order.subtotal || 0,
+                VAT: order.vat || 0,
+                serviceCharge: order.serviceCharge || 0,
+                discount: order.discount || 0,
+                tip: order.tip || 0,
+                total: order.total || 0,
+                notes: order.note || '',
+                createdAt: order.createdAt || new Date().toISOString(),
+                updatedAt: order.updatedAt || new Date().toISOString(),
+                statusHistory: existingOrder?.statusHistory || [{
+                    status: order.status,
+                    timestamp: new Date().toISOString(),
+                    userId: order.waiter || 'system'
+                }]
+            };
+        });
+        StorageService.setOrders(normalizedOrders);
+    } else {
+        // Fall back to old method
+        localStorage.setItem('cafe_orders', JSON.stringify(orders));
+    }
     window.dispatchEvent(new Event('orders_updated'));
 }
 
@@ -89,15 +203,81 @@ function updateOrderStatus(orderId, status) {
         orders[idx].status = status;
         if(status === 'ready') orders[idx].readyAt = new Date().toISOString();
         if(status === 'completed') orders[idx].completedAt = new Date().toISOString();
+        if(status === 'paid') orders[idx].paidAt = new Date().toISOString();
         saveOrders(orders);
+        
+        // Add audit log if available
+        if (typeof StorageService !== 'undefined' && StorageService.addAuditLog) {
+            const session = getUser();
+            StorageService.addAuditLog({
+                userId: session.username || 'system',
+                action: 'status_changed',
+                entityType: 'order',
+                entityId: orderId,
+                description: `Order status changed to ${status}`
+            });
+        }
     }
 }
 
 function getUser() {
-    return JSON.parse(localStorage.getItem(USER_KEY) || '{}');
+    // Try to use new storage service first
+    if (typeof StorageService !== 'undefined' && StorageService.getSession) {
+        return StorageService.getSession();
+    }
+    // Fall back to old method
+    return JSON.parse(localStorage.getItem('cafe_session') || '{}');
 }
 
 function logout() {
-    localStorage.removeItem(USER_KEY);
-    window.location.href = 'index.html';
+    // Add audit log if available
+    if (typeof StorageService !== 'undefined' && StorageService.addAuditLog) {
+        const session = getUser();
+        StorageService.addAuditLog({
+            userId: session.username || 'system',
+            action: 'logout',
+            entityType: 'session',
+            entityId: session.username || 'system',
+            description: 'User logged out'
+        });
+    }
+    
+    // Clear session
+    if (typeof StorageService !== 'undefined' && StorageService.clearSession) {
+        StorageService.clearSession();
+    } else {
+        localStorage.removeItem('cafe_session');
+    }
+    
+    window.location.href = 'login.html';
+}
+
+// Route protection functions
+function requireAuth() {
+    const session = getUser();
+    if (!session || !session.username || !session.role) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    return true;
+}
+
+function requireRole(allowedRoles) {
+    if (!requireAuth()) return false;
+    
+    const session = getUser();
+    if (!allowedRoles.includes(session.role)) {
+        // Redirect to appropriate page based on role
+        if (session.role === 'waiter') {
+            window.location.href = 'waiter.html';
+        } else if (session.role === 'cook') {
+            window.location.href = 'kitchen.html';
+        } else if (session.role === 'admin') {
+            window.location.href = 'admin.html';
+        } else {
+            window.location.href = 'login.html';
+        }
+        return false;
+    }
+    return true;
 }

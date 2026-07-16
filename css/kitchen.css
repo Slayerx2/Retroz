@@ -1,4 +1,297 @@
-/* Kitchen-specific styles */
+/* Kitchen-specific styles - Kitchen Display System */
+
+.kitchen-display {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: calc(100vh - 80px);
+}
+
+/* Header Controls */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon-btn {
+  background: none;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 1.2em;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover {
+  background: #f5f5f5;
+  border-color: var(--primary);
+}
+
+.icon-btn.muted {
+  opacity: 0.5;
+}
+
+/* Kitchen Announcement */
+.kitchen-announcement-section {
+  background: #fff;
+  border: 2px solid var(--primary);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kitchen-announcement {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.announcement-label {
+  font-weight: bold;
+  color: var(--primary);
+  font-size: 1.1em;
+}
+
+#announcementText {
+  flex: 1;
+  color: #333;
+}
+
+.edit-btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.edit-btn:hover {
+  background: #ff8555;
+}
+
+/* Kitchen Board */
+.kitchen-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  min-height: calc(100vh - 200px);
+}
+
+.kitchen-column {
+  background: #f9f9f9;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.column-header {
+  background: var(--primary);
+  color: #fff;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.column-header h3 {
+  margin: 0;
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.order-count {
+  background: rgba(255,255,255,0.2);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+.column-content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Kitchen Order Cards */
+.kitchen-order-card {
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s;
+}
+
+.kitchen-order-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.kitchen-order-card.timing-warning {
+  border-color: #ff9800;
+  background: #fff3e0;
+}
+
+.kitchen-order-card.timing-delayed {
+  border-color: #f44336;
+  background: #ffebee;
+}
+
+.kitchen-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.kitchen-order-number {
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #333;
+}
+
+.kitchen-order-time {
+  font-size: 0.85em;
+  color: #666;
+  font-weight: 600;
+}
+
+.kitchen-order-time.warning {
+  color: #ff9800;
+}
+
+.kitchen-order-time.delayed {
+  color: #f44336;
+}
+
+.kitchen-order-body {
+  margin-bottom: 12px;
+}
+
+.kitchen-order-info {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.kitchen-order-info strong {
+  color: #333;
+}
+
+.kitchen-order-items {
+  margin-bottom: 8px;
+}
+
+.kitchen-order-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 0.9em;
+  color: #555;
+}
+
+.kitchen-order-item-quantity {
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.kitchen-order-note {
+  font-size: 0.85em;
+  color: #888;
+  font-style: italic;
+  padding: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.kitchen-order-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.kitchen-order-actions button {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.kitchen-order-actions button.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.kitchen-order-actions button.btn-primary:hover {
+  background: #ff8555;
+}
+
+.kitchen-order-actions button.btn-secondary {
+  background: #fff;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.kitchen-order-actions button.btn-secondary:hover {
+  background: #f5f5f5;
+}
+
+/* Empty States */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .kitchen-board {
+    grid-template-columns: 1fr;
+  }
+  
+  .kitchen-column {
+    min-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .kitchen-display {
+    padding: 10px;
+  }
+  
+  .kitchen-announcement-section {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+  
+  .kitchen-announcement {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
 
 .kitchen-orders {
   max-width: 800px;
