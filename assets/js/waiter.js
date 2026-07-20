@@ -561,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="order-card-info">
                     <span><strong>${tableInfo}</strong></span>
                     <span><strong>Waiter:</strong> ${order.waiter}</span>
-                    <span class="status-badge ${order.status}">${order.status.replace('-', ' ')}</span>
+                    <span class="status-badge ${order.status}" data-status="${order.status}">${order.status.replace('-', ' ')}</span>
                 </div>
                 <div class="order-card-items">${itemsSummary}</div>
                 ${order.note ? `<div class="order-card-note">Note: ${order.note}</div>` : ''}
@@ -1029,6 +1029,21 @@ document.addEventListener('DOMContentLoaded', () => {
         printWindow.document.close();
         printWindow.print();
     }
+
+    // Modal accessibility - close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modals = document.querySelectorAll('.modal[style*="flex"]');
+            modals.forEach(modal => {
+                modal.style.display = 'none';
+            });
+            
+            // Reset checkout state if open
+            if (currentCheckoutOrder) {
+                currentCheckoutOrder = null;
+            }
+        }
+    });
 
     // Event listeners for updates
     window.addEventListener('orders_updated', () => {

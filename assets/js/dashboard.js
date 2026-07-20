@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tables: 'Tables',
             staff: 'Staff',
             reports: 'Reports',
+            audit: 'Audit Logs',
             settings: 'Settings'
         };
         document.getElementById('pageTitle').textContent = titles[section];
@@ -64,6 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'reports':
                 renderReports();
+                break;
+            case 'audit':
+                renderAuditLogs();
                 break;
             case 'settings':
                 renderSettings();
@@ -824,6 +828,67 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('CSV exported successfully', 'success');
     }
 
+    // Audit Logs Section
+    function renderAuditLogs() {
+        const actionFilter = document.getElementById('auditActionFilter').value;
+        const entityFilter = document.getElementById('auditEntityTypeFilter').value;
+        
+        let logs = [];
+        if (typeof StorageService !== 'undefined' && StorageService.getAuditLogs) {
+            logs = StorageService.getAuditLogs();
+        }
+        
+        // Sort by timestamp (newest first)
+        logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        // Filter logs
+        if (actionFilter !== 'all') {
+            logs = logs.filter(log => log.action === actionFilter);
+        }
+        if (entityFilter !== 'all') {
+            logs = logs.filter(log => log.entityType === entityFilter);
+        }
+        
+        const auditContent = document.getElementById('auditLogsContent');
+        auditContent.innerHTML = '';
+        
+        if (logs.length === 0) {
+            auditContent.innerHTML = '<div class="empty-state">No audit logs found</div>';
+            return;
+        }
+        
+        const table = document.createElement('table');
+        table.className = 'audit-table';
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Entity</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${logs.map(log => `
+                    <tr>
+                        <td>${new Date(log.timestamp).toLocaleString()}</td>
+                        <td>${log.userId}</td>
+                        <td><span class="action-badge ${log.action}">${formatAction(log.action)}</span></td>
+                        <td>${log.entityType} #${log.entityId}</td>
+                        <td>${log.description}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+        
+        auditContent.appendChild(table);
+    }
+    
+    function formatAction(action) {
+        return action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
     // Settings Section
     function renderSettings() {
         const settings = getSettings();
@@ -909,7 +974,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('reportDateRange').addEventListener('change', renderReports);
     document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
 
+    document.getElementById('auditActionFilter').addEventListener('change', renderAuditLogs);
+    document.getElementById('auditEntityTypeFilter').addEventListener('change', renderAuditLogs);
+
     document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+
+    // Modal accessibility - close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modals = document.querySelectorAll('.modal[style*="flex"]');
+            modals.forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+    });
 
     window.addEventListener('orders_updated', () => {
         if (currentSection === 'overview') renderOverview();
