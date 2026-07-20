@@ -10,6 +10,62 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedCategory = 'all';
     let cart = JSON.parse(localStorage.getItem('cafe_cart') || '[]');
     let isSubmitting = false;
+    let isProcessingPayment = false;
+    let currentCheckoutOrder = null;
+
+    // Cart state persistence key
+    const CART_STATE_KEY = 'cafe_cart_state';
+
+    // Save cart state to localStorage
+    function saveCartState() {
+        try {
+            const state = {
+                cart: cart,
+                selectedTable: selectedTable,
+                currentOrderType: currentOrderType,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem(CART_STATE_KEY, JSON.stringify(state));
+        } catch (e) {
+            console.error('Error saving cart state:', e);
+        }
+    }
+
+    // Restore cart state from localStorage
+    function restoreCartState() {
+        try {
+            const stateStr = localStorage.getItem(CART_STATE_KEY);
+            if (stateStr) {
+                const state = JSON.parse(stateStr);
+                // Only restore if less than 2 hours old
+                const stateAge = Date.now() - new Date(state.timestamp).getTime();
+                if (stateAge < 2 * 60 * 60 * 1000) {
+                    cart = state.cart || [];
+                    selectedTable = state.selectedTable;
+                    currentOrderType = state.currentOrderType || 'dinein';
+                    updateCartDisplay();
+                    updateSelectedTableInfo();
+                    validateOrder();
+                    
+                    if (cart.length > 0) {
+                        showToast('Order restored from previous session', 'info');
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Error restoring cart state:', e);
+            // Clear corrupted state
+            localStorage.removeItem(CART_STATE_KEY);
+        }
+    }
+
+    // Clear cart state
+    function clearCartState() {
+        localStorage.removeItem(CART_STATE_KEY);
+    }
+
+    // Initialize cart state restoration
+    restoreCartState();
 
     // Constants
     const VAT_RATE = 0.13;
@@ -218,7 +274,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Cart management
+    // Check cart for unavailable items
+    function checkCartAvailability() {
+        const menu = getMenu();
+        const unavailableItems = cart.filter(cartItem => {
+            const menuItem = menu.find(m => m.id === cartItem.id);
+            return !menuItem || !menuItem.available || menuItem.archived;
+        });
+
+        return unavailableItems;
+    }
+
     function addToCart(item) {
+        const menu = getMenu();
+        const menuItem = menu.find(m => m.id === item.id);
+        
+        // Check if item is available
+        if (!menuItem || !menuItem.available || menuItem.archived) {
+            ModalUtils.alert({
+                title: 'Item Unavailable',
+                message: `${item.name} is currently unavailable and cannot be added to the order.`,
+                type: 'warning'
+            });
+            return;
+        }
+
         const existingItem = cart.find(c => c.id === item.id);
         if (existingItem) {
             existingItem.quantity++;
@@ -234,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveCart();
         renderCart();
         validateOrder();
+        saveCartState();
     }
 
     function updateCartItemQuantity(itemId, delta) {
@@ -421,8 +502,45 @@ document.addEventListener('DOMContentLoaded', () => {
         const total = subtotal + vat + serviceCharge - discount;
         const orderNote = document.getElementById('orderNote').value;
 
+        // Validation
+        if (cart.length === 0) {
+            ModalUtils.alert({
+                title: 'Empty Order',
+                message: 'Please add items to the order before submitting.',
+                type: 'warning'
+            });
+            isSubmitting = false;
+            return;
+        }
+
+        // Check for unavailable items
+        const unavailableItems = checkCartAvailability();
+        if (unavailableItems.length > 0) {
+            const itemNames = unavailableItems.map(i => i.name).join(', ');
+            ModalUtils.alert({
+                title: 'Unavailable Items',
+                message: `The following items are no longer available: ${itemNames}. Please remove them from the order.`,
+                type: 'error'
+            });
+            isSubmitting = false;
+            return;
+        }
+
+        if (currentOrderType === 'dinein' && !selectedTable) {
+            ModalUtils.alert({
+                title: 'No Table Selected',
+                message: 'Please select a table for dine-in orders.',
+                type: 'warning'
+            });
+            isSubmitting = false;
+            return;
+        }
+
         const order = {
             id: 'o_' + Date.now(),
+            orderNumber: typeof StorageService !== 'undefined' && StorageService.generateOrderNumber 
+                ? StorageService.generateOrderNumber() 
+                : Date.now().toString(),
             table: currentOrderType === 'dinein' ? selectedTable : null,
             items: cart.map(item => ({
                 id: item.id,
@@ -442,6 +560,13 @@ document.addEventListener('DOMContentLoaded', () => {
             discount,
             total
         };
+
+        // Show loading state
+        const submitBtn = document.getElementById('submitOrderBtn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+        }
 
         addOrder(order);
 
@@ -467,6 +592,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showToast('Order sent to kitchen successfully!', 'success');
         renderActiveOrders();
+
+        // Reset button state
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Send to Kitchen';
+        }
 
         isSubmitting = false;
     }
@@ -690,8 +821,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Checkout Modal
-    let currentCheckoutOrder = null;
-
     function showCheckoutModal(order) {
         currentCheckoutOrder = order;
         const modal = document.getElementById('checkoutModal');
@@ -790,7 +919,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function processPayment() {
         if (!currentCheckoutOrder) return;
+        if (isProcessingPayment) return;
+        isProcessingPayment = true;
 
+        const user = getUser();
         const paymentMethod = document.getElementById('paymentMethod').value;
         const tip = parseFloat(document.getElementById('tipAmount').value) || 0;
         const totalDue = currentCheckoutOrder.total + tip;
@@ -799,53 +931,79 @@ document.addEventListener('DOMContentLoaded', () => {
         if (paymentMethod === 'cash') {
             const amountReceived = parseFloat(document.getElementById('amountReceived').value) || 0;
             if (amountReceived < totalDue) {
-                showToast('Amount received is less than total due', 'warning');
+                ModalUtils.alert({
+                    title: 'Insufficient Payment',
+                    message: `Amount received (NPR ${amountReceived.toFixed(0)}) is less than total due (NPR ${totalDue.toFixed(0)}).`,
+                    type: 'error'
+                });
+                isProcessingPayment = false;
                 return;
             }
         }
 
-        // Confirm payment
-        if (!confirm('Confirm payment processing?')) return;
+        // Confirm payment using custom modal
+        ModalUtils.confirm({
+            title: 'Confirm Payment',
+            message: `Process payment of NPR ${totalDue.toFixed(0)} via ${paymentMethod}?`,
+            type: 'info',
+            onConfirm: () => {
+                // Show loading state
+                const confirmBtn = document.getElementById('confirmPaymentBtn');
+                if (confirmBtn) {
+                    confirmBtn.disabled = true;
+                    confirmBtn.textContent = 'Processing...';
+                }
 
-        // Update order
-        const orders = getOrders();
-        const orderIndex = orders.findIndex(o => o.id === currentCheckoutOrder.id);
-        if (orderIndex !== -1) {
-            orders[orderIndex].status = 'paid';
-            orders[orderIndex].tip = tip;
-            orders[orderIndex].paymentMethod = paymentMethod;
-            orders[orderIndex].paidAt = new Date().toISOString();
-            
-            if (paymentMethod === 'cash') {
-                orders[orderIndex].amountReceived = parseFloat(document.getElementById('amountReceived').value) || 0;
-                orders[orderIndex].changeDue = orders[orderIndex].amountReceived - totalDue;
+                // Update order
+                const orders = getOrders();
+                const orderIndex = orders.findIndex(o => o.id === currentCheckoutOrder.id);
+                if (orderIndex !== -1) {
+                    orders[orderIndex].status = 'paid';
+                    orders[orderIndex].tip = tip;
+                    orders[orderIndex].paymentMethod = paymentMethod;
+                    orders[orderIndex].paidAt = new Date().toISOString();
+                    
+                    if (paymentMethod === 'cash') {
+                        orders[orderIndex].amountReceived = parseFloat(document.getElementById('amountReceived').value) || 0;
+                        orders[orderIndex].changeDue = orders[orderIndex].amountReceived - totalDue;
+                    }
+
+                    saveOrders(orders);
+                }
+
+                // Add audit log for payment
+                if (typeof StorageService !== 'undefined' && StorageService.addAuditLog) {
+                    StorageService.addAuditLog({
+                        userId: user.username,
+                        action: 'payment_completed',
+                        entityType: 'order',
+                        entityId: currentCheckoutOrder.id,
+                        description: `Payment completed via ${paymentMethod} - NPR ${totalDue.toFixed(0)}`
+                    });
+                }
+
+                // Reset button state
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = 'Confirm Payment';
+                }
+
+                // Close checkout modal
+                document.getElementById('checkoutModal').style.display = 'none';
+
+                // Show success modal
+                showPaymentSuccessModal(orders[orderIndex], totalDue);
+
+                // Update UI
+                renderActiveOrders();
+                renderTables();
+
+                isProcessingPayment = false;
+            },
+            onCancel: () => {
+                isProcessingPayment = false;
             }
-
-            saveOrders(orders);
-        }
-
-        // Add audit log for payment
-        if (typeof StorageService !== 'undefined' && StorageService.addAuditLog) {
-            StorageService.addAuditLog({
-                userId: user.username,
-                action: 'payment_completed',
-                entityType: 'order',
-                entityId: currentCheckoutOrder.id,
-                description: `Payment completed via ${paymentMethod} - NPR ${totalPaid.toFixed(0)}`
-            });
-        }
-
-        // Close checkout modal
-        document.getElementById('checkoutModal').style.display = 'none';
-
-        // Show success modal
-        showPaymentSuccessModal(orders[orderIndex], totalDue);
-
-        // Update UI
-        renderActiveOrders();
-        renderTables();
-
-        currentCheckoutOrder = null;
+        });
     }
 
     function showPaymentSuccessModal(order, totalPaid) {
