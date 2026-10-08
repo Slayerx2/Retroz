@@ -9,28 +9,669 @@
     <link rel="stylesheet" href="../css/components.css" />
     <link rel="stylesheet" href="../css/admin.css" />
     <link rel="stylesheet" href="../css/responsive.css" />
+    <link rel="stylesheet" href="../css/print.css" media="print" />
 </head>
 <body>
-    <header>
-        <h2>Admin Dashboard</h2>
-        <button id="logoutBtn">Logout</button>
-        <button id="menuMgmtBtn">Menu Management</button>
-    </header>
-    <main>
-        <section>
-            <h3>All Orders</h3>
-            <div id="allOrdersList"></div>
-            <div class="price-disclaimer">All prices in NPR. Menu images are for illustration.</div>
-        </section>
-        <section>
-            <h3>Menu Management</h3>
-            <div id="menuManagement"></div>
-        </section>
-        <section>
-            <h3>Tips Tracking</h3>
-            <div id="tipsTracking"></div>
-        </section>
-    </main>
+    <div class="admin-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h2>☕ CaféPOS</h2>
+                <span class="sidebar-subtitle">Admin Console</span>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Overview</div>
+                    <button class="nav-item active" data-section="overview">
+                        <span class="nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </button>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Operations</div>
+                    <button class="nav-item" data-section="orders">
+                        <span class="nav-icon">📋</span>
+                        <span>Orders</span>
+                    </button>
+                    <button class="nav-item" data-section="tables">
+                        <span class="nav-icon">🪑</span>
+                        <span>Tables</span>
+                    </button>
+                    <button class="nav-item" data-section="kitchen">
+                        <span class="nav-icon">👨‍🍳</span>
+                        <span>Kitchen Monitor</span>
+                    </button>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Menu</div>
+                    <button class="nav-item" data-section="products">
+                        <span class="nav-icon">🍔</span>
+                        <span>Products</span>
+                    </button>
+                    <button class="nav-item" data-section="categories">
+                        <span class="nav-icon">📁</span>
+                        <span>Categories</span>
+                    </button>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Sales</div>
+                    <button class="nav-item" data-section="sales-overview">
+                        <span class="nav-icon">💰</span>
+                        <span>Sales Overview</span>
+                    </button>
+                    <button class="nav-item" data-section="payments">
+                        <span class="nav-icon">💳</span>
+                        <span>Payments</span>
+                    </button>
+                    <button class="nav-item" data-section="discounts">
+                        <span class="nav-icon">🏷️</span>
+                        <span>Discounts</span>
+                    </button>
+                    <button class="nav-item" data-section="refunds">
+                        <span class="nav-icon">↩️</span>
+                        <span>Refunds / Voids</span>
+                    </button>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Reports</div>
+                    <button class="nav-item" data-section="daily-closing">
+                        <span class="nav-icon">📊</span>
+                        <span>Daily Closing</span>
+                    </button>
+                    <button class="nav-item" data-section="product-reports">
+                        <span class="nav-icon">📈</span>
+                        <span>Product Reports</span>
+                    </button>
+                    <button class="nav-item" data-section="staff-reports">
+                        <span class="nav-icon">👥</span>
+                        <span>Staff Reports</span>
+                    </button>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Settings</div>
+                    <button class="nav-item" data-section="cafe-profile">
+                        <span class="nav-icon">🏢</span>
+                        <span>Café Profile</span>
+                    </button>
+                    <button class="nav-item" data-section="tax-charges">
+                        <span class="nav-icon">🧾</span>
+                        <span>Tax & Charges</span>
+                    </button>
+                    <button class="nav-item" data-section="receipt-settings">
+                        <span class="nav-icon">🖨️</span>
+                        <span>Receipt Settings</span>
+                    </button>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <button class="nav-item" data-section="audit-log">
+                        <span class="nav-icon">📝</span>
+                        <span>Audit Log</span>
+                    </button>
+                    <button class="nav-item" data-section="data-management">
+                        <span class="nav-icon">💾</span>
+                        <span>Data Management</span>
+                    </button>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="nav-item logout">
+                    <span class="nav-icon">🚪</span>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1 id="pageTitle">Dashboard</h1>
+                <div class="header-actions">
+                    <span id="currentDate" class="date-display"></span>
+                    <span id="currentUser" class="user-display"></span>
+                </div>
+            </header>
+
+            <!-- Content Sections -->
+            <div id="content-area">
+                <!-- Overview Section -->
+                <section id="section-overview" class="content-section active">
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-label">Today's Sales</div>
+                            <div class="kpi-value" id="kpi-sales">NPR 0</div>
+                            <div class="kpi-trend" id="kpi-sales-trend">+0%</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Orders</div>
+                            <div class="kpi-value" id="kpi-orders">0</div>
+                            <div class="kpi-trend" id="kpi-orders-trend">+0%</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Average Order</div>
+                            <div class="kpi-value" id="kpi-avg-order">NPR 0</div>
+                            <div class="kpi-trend" id="kpi-avg-trend">+0%</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Items Sold</div>
+                            <div class="kpi-value" id="kpi-items">0</div>
+                            <div class="kpi-trend" id="kpi-items-trend">+0%</div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <h3>Sales Overview</h3>
+                            <div class="date-filter">
+                                <button class="filter-btn active" data-range="today">Today</button>
+                                <button class="filter-btn" data-range="yesterday">Yesterday</button>
+                                <button class="filter-btn" data-range="7days">7 Days</button>
+                                <button class="filter-btn" data-range="30days">30 Days</button>
+                                <button class="filter-btn" data-range="custom">Custom</button>
+                            </div>
+                            <div id="sales-chart-container" class="chart-container">
+                                <div class="no-data">No sales data for this period</div>
+                            </div>
+                            <div class="sales-summary">
+                                <div class="summary-item">
+                                    <span class="summary-label">Revenue</span>
+                                    <span class="summary-value" id="summary-revenue">NPR 0</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Orders</span>
+                                    <span class="summary-value" id="summary-orders">0</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Avg Order</span>
+                                    <span class="summary-value" id="summary-avg">NPR 0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <h3>Quick Actions</h3>
+                            <div class="quick-actions">
+                                <button class="quick-action-btn" onclick="openDailyReport()">
+                                    <span class="action-icon">📊</span>
+                                    <span>Daily Report</span>
+                                </button>
+                                <button class="quick-action-btn" onclick="openAuditLog()">
+                                    <span class="action-icon">📝</span>
+                                    <span>Audit Log</span>
+                                </button>
+                                <button class="quick-action-btn" onclick="navigateToSection('orders')">
+                                    <span class="action-icon">📋</span>
+                                    <span>View Orders</span>
+                                </button>
+                                <button class="quick-action-btn" onclick="navigateToSection('products')">
+                                    <span class="action-icon">🍔</span>
+                                    <span>Manage Menu</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>Recent Activity</h3>
+                        <div id="recent-activity" class="activity-list"></div>
+                    </div>
+                </section>
+
+                <!-- Orders Section -->
+                <section id="section-orders" class="content-section">
+                    <div class="section-toolbar">
+                        <div class="toolbar-filters">
+                            <select id="order-date-filter" class="filter-select">
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="7days">Last 7 Days</option>
+                                <option value="30days">Last 30 Days</option>
+                                <option value="all">All Time</option>
+                            </select>
+                            <select id="order-status-filter" class="filter-select">
+                                <option value="all">All Status</option>
+                                <option value="open">Open</option>
+                                <option value="preparing">Preparing</option>
+                                <option value="ready">Ready</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="refunded">Refunded</option>
+                            </select>
+                            <select id="order-payment-filter" class="filter-select">
+                                <option value="all">All Payments</option>
+                                <option value="cash">Cash</option>
+                                <option value="card">Card</option>
+                                <option value="mobile">Mobile</option>
+                            </select>
+                            <input type="text" id="order-search" class="search-input" placeholder="Search orders...">
+                        </div>
+                        <button class="btn-primary" onclick="exportOrders()">Export CSV</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Table</th>
+                                    <th>Waiter</th>
+                                    <th>Items</th>
+                                    <th>Subtotal</th>
+                                    <th>Discount</th>
+                                    <th>Total</th>
+                                    <th>Payment</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-table-body"></tbody>
+                        </table>
+                    </div>
+                    <div id="orders-empty" class="empty-state" style="display:none;">
+                        <p>No orders found matching your filters.</p>
+                    </div>
+                </section>
+
+                <!-- Tables Section -->
+                <section id="section-tables" class="content-section">
+                    <div class="table-status-grid" id="table-status-grid"></div>
+                    <div class="dashboard-card">
+                        <h3>Table History</h3>
+                        <div id="table-history-list" class="history-list"></div>
+                    </div>
+                </section>
+
+                <!-- Kitchen Monitor Section -->
+                <section id="section-kitchen" class="content-section">
+                    <div class="kitchen-board">
+                        <div class="kitchen-column">
+                            <h3>New Orders <span id="kitchen-new-count">0</span></h3>
+                            <div id="kitchen-new-orders"></div>
+                        </div>
+                        <div class="kitchen-column">
+                            <h3>Preparing <span id="kitchen-preparing-count">0</span></h3>
+                            <div id="kitchen-preparing-orders"></div>
+                        </div>
+                        <div class="kitchen-column">
+                            <h3>Ready <span id="kitchen-ready-count">0</span></h3>
+                            <div id="kitchen-ready-orders"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Products Section -->
+                <section id="section-products" class="content-section">
+                    <div class="section-toolbar">
+                        <button class="btn-primary" onclick="openProductModal()">+ Add Product</button>
+                    </div>
+                    <div class="products-grid" id="products-grid"></div>
+                </section>
+
+                <!-- Categories Section -->
+                <section id="section-categories" class="content-section">
+                    <div class="section-toolbar">
+                        <button class="btn-primary" onclick="openCategoryModal()">+ Add Category</button>
+                    </div>
+                    <div class="categories-list" id="categories-list"></div>
+                </section>
+
+                <!-- Sales Overview Section -->
+                <section id="section-sales-overview" class="content-section">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <h3>Sales Breakdown</h3>
+                            <div class="sales-breakdown">
+                                <div class="breakdown-item">
+                                    <span class="breakdown-label">Gross Sales</span>
+                                    <span class="breakdown-value" id="gross-sales">NPR 0</span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span class="breakdown-label">Discounts</span>
+                                    <span class="breakdown-value negative" id="total-discounts">-NPR 0</span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span class="breakdown-label">Refunds</span>
+                                    <span class="breakdown-value negative" id="total-refunds">-NPR 0</span>
+                                </div>
+                                <div class="breakdown-item total">
+                                    <span class="breakdown-label">Net Sales</span>
+                                    <span class="breakdown-value" id="net-sales">NPR 0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>Taxes & Charges</h3>
+                            <div class="sales-breakdown">
+                                <div class="breakdown-item">
+                                    <span class="breakdown-label">VAT</span>
+                                    <span class="breakdown-value" id="total-vat">NPR 0</span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span class="breakdown-label">Service Charge</span>
+                                    <span class="breakdown-value" id="total-service">NPR 0</span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span class="breakdown-label">Tips</span>
+                                    <span class="breakdown-value" id="total-tips">NPR 0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>Payment Breakdown</h3>
+                        <div class="payment-breakdown" id="payment-breakdown"></div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>Orders by Hour</h3>
+                        <div id="hourly-orders-chart" class="chart-container"></div>
+                    </div>
+                </section>
+
+                <!-- Payments Section -->
+                <section id="section-payments" class="content-section">
+                    <div class="dashboard-card">
+                        <h3>Payment Methods</h3>
+                        <div class="payment-methods-grid" id="payment-methods-grid"></div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>Payment History</h3>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Order #</th>
+                                        <th>Method</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payments-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Discounts Section -->
+                <section id="section-discounts" class="content-section">
+                    <div class="dashboard-card">
+                        <h3>Discount History</h3>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Order #</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Reason</th>
+                                        <th>Applied By</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="discounts-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Refunds Section -->
+                <section id="section-refunds" class="content-section">
+                    <div class="dashboard-card">
+                        <h3>Refund History</h3>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Order #</th>
+                                        <th>Amount</th>
+                                        <th>Reason</th>
+                                        <th>Processed By</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="refunds-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Daily Closing Section -->
+                <section id="section-daily-closing" class="content-section">
+                    <div class="dashboard-card">
+                        <h3>Daily Closing Report</h3>
+                        <div class="date-filter">
+                            <input type="date" id="report-date" class="date-input">
+                            <button class="btn-primary" onclick="generateDailyReport()">Generate Report</button>
+                            <button class="btn-secondary" onclick="exportDailyReport()">Export CSV</button>
+                            <button class="btn-secondary" onclick="printDailyReport()">Print</button>
+                        </div>
+                        <div id="daily-report-content" class="report-content"></div>
+                    </div>
+                </section>
+
+                <!-- Product Reports Section -->
+                <section id="section-product-reports" class="content-section">
+                    <div class="dashboard-card">
+                        <h3>Best Selling Items</h3>
+                        <div id="best-selling-items" class="ranking-list"></div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>Category Performance</h3>
+                        <div id="category-performance" class="ranking-list"></div>
+                    </div>
+                </section>
+
+                <!-- Staff Reports Section -->
+                <section id="section-staff-reports" class="content-section">
+                    <div class="dashboard-card">
+                        <h3>Waiter Performance</h3>
+                        <div id="waiter-performance" class="ranking-list"></div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>Tips by Staff</h3>
+                        <div id="tips-by-staff" class="ranking-list"></div>
+                    </div>
+                </section>
+
+                <!-- Café Profile Section -->
+                <section id="section-cafe-profile" class="content-section">
+                    <div class="dashboard-card">
+                        <h3>Café Profile</h3>
+                        <form id="cafe-profile-form" class="settings-form">
+                            <div class="form-group">
+                                <label>Café Name</label>
+                                <input type="text" id="cafe-name" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Address</label>
+                                <textarea id="cafe-address" class="form-textarea" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="tel" id="cafe-phone" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="cafe-email" class="form-input">
+                            </div>
+                            <button type="submit" class="btn-primary">Save Profile</button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Tax & Charges Section -->
+                <section id="section-tax-charges" class="content-section">
+                    <div class="dashboard-card">
+                        <h3>Tax & Charges</h3>
+                        <form id="tax-form" class="settings-form">
+                            <div class="form-group">
+                                <label>VAT Rate (%)</label>
+                                <input type="number" id="vat-rate" class="form-input" step="0.1" min="0" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label>Service Charge Rate (%)</label>
+                                <input type="number" id="service-charge-rate" class="form-input" step="0.1" min="0" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label>Tax ID</label>
+                                <input type="text" id="tax-id" class="form-input">
+                            </div>
+                            <button type="submit" class="btn-primary">Save Settings</button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Receipt Settings Section -->
+                <section id="section-receipt-settings" class="content-section">
+                    <div class="dashboard-card">
+                        <h3>Receipt Settings</h3>
+                        <form id="receipt-form" class="settings-form">
+                            <div class="form-group">
+                                <label>Receipt Header</label>
+                                <textarea id="receipt-header" class="form-textarea" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Receipt Footer</label>
+                                <textarea id="receipt-footer" class="form-textarea" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary">Save Settings</button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Audit Log Section -->
+                <section id="section-audit-log" class="content-section">
+                    <div class="section-toolbar">
+                        <select id="audit-action-filter" class="filter-select">
+                            <option value="">All Actions</option>
+                            <option value="payment">Payments</option>
+                            <option value="refund">Refunds</option>
+                            <option value="void">Voids</option>
+                            <option value="discount">Discounts</option>
+                            <option value="split">Split Bills</option>
+                            <option value="merge">Table Merges</option>
+                            <option value="move">Table Moves</option>
+                        </select>
+                        <input type="text" id="audit-user-filter" class="search-input" placeholder="Filter by user...">
+                    </div>
+                    <div id="audit-log-content" class="audit-log-list"></div>
+                </section>
+
+                <!-- Data Management Section -->
+                <section id="section-data-management" class="content-section">
+                    <div class="dashboard-card">
+                        <h3>Data Management</h3>
+                        <div class="data-actions">
+                            <button class="btn-primary" onclick="exportAllData()">Export All Data</button>
+                            <button class="btn-secondary" onclick="importData()">Import Data</button>
+                            <button class="btn-danger" onclick="clearOldData()">Clear Old Data (30+ days)</button>
+                        </div>
+                        <div class="storage-info">
+                            <p>Storage Used: <span id="storage-used">0 KB</span></p>
+                            <p>Schema Version: <span id="schema-version">1</span></p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Order Detail Drawer -->
+    <div id="order-drawer" class="drawer">
+        <div class="drawer-header">
+            <h3>Order Details</h3>
+            <button class="drawer-close" onclick="closeOrderDrawer()">×</button>
+        </div>
+        <div class="drawer-content" id="order-drawer-content"></div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="product-modal-title">Add Product</h3>
+                <button class="modal-close" onclick="closeProductModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="product-form" class="settings-form">
+                    <input type="hidden" id="product-id">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="product-name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price</label>
+                        <input type="number" id="product-price" class="form-input" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="product-category" class="form-select" required>
+                            <option value="veg">Veg</option>
+                            <option value="non-veg">Non-Veg</option>
+                            <option value="snacks">Snacks</option>
+                            <option value="drinks">Drinks</option>
+                            <option value="bakery">Bakery & Sweets</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="product-available"> Available
+                        </label>
+                    </div>
+                    <button type="submit" class="btn-primary">Save Product</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Refund/Void Modal -->
+    <div id="refundVoidModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="refundVoidTitle">Refund Order</h3>
+                <button class="modal-close" onclick="closeRefundVoidModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="refundVoidOrderInfo"></p>
+                <label>Action:</label>
+                <select id="refundVoidAction" class="form-select">
+                    <option value="refund">Refund</option>
+                    <option value="void">Void</option>
+                </select>
+                <div id="refundAmountDiv">
+                    <label>Refund Amount:</label>
+                    <input type="number" id="refundAmount" class="form-input" min="0">
+                    <label>
+                        <input type="checkbox" id="partialRefund"> Partial Refund
+                    </label>
+                </div>
+                <label>Reason:</label>
+                <textarea id="refundVoidReason" class="form-textarea" rows="3"></textarea>
+                <button id="confirmRefundVoid" class="btn-primary">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>Receipt</h3>
+                <button class="modal-close" onclick="closeReceiptModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="receiptContent" class="receipt-content"></div>
+                <button id="printReceipt" class="btn-primary">Print</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../js/config.js"></script>
     <script src="../js/storage.js"></script>
     <script src="../js/utils.js"></script>
@@ -38,8 +679,5 @@
     <script src="../js/common.js"></script>
     <script src="../js/ui.js"></script>
     <script src="../js/admin.js"></script>
-    <script>
-        document.getElementById('logoutBtn').addEventListener('click', Auth.logout);
-    </script>
 </body>
 </html>

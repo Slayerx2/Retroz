@@ -22,23 +22,23 @@ const Auth = {
   logout() {
     Storage.remove(CONFIG.STORAGE_KEYS.USER);
     Storage.remove('token');
-    window.location.href = 'pages/login.html';
+    window.location.href = 'login.html';
   },
 
   // Redirect based on role
   redirectToRolePage(role) {
     const rolePages = {
-      'waiter': 'pages/waiter.html',
-      'cook': 'pages/kitchen.html',
-      'admin': 'pages/admin.html'
+      'waiter': 'waiter.html',
+      'cook': 'kitchen.html',
+      'admin': 'admin.html'
     };
-    window.location.href = rolePages[role] || 'pages/login.html';
+    window.location.href = rolePages[role] || 'login.html';
   },
 
   // Check authentication and redirect if not logged in
   requireAuth() {
     if (!this.isLoggedIn()) {
-      window.location.href = 'pages/login.html';
+      window.location.href = 'login.html';
     }
   }
 };

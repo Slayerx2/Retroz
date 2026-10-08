@@ -25,6 +25,7 @@
     <main>
         <section id="table-panel">
             <h3>Tables</h3>
+            <button id="mergeTablesBtn" style="margin-bottom:10px;font-size:12px;padding:4px 8px;">Merge Tables</button>
             <div id="tablesGrid"></div>
         </section>
         <section id="kitchen-note-for-waiter">
@@ -63,6 +64,100 @@
             <div id="ordersList"></div>
         </section>
     </main>
+
+    <!-- Split Bill Modal -->
+    <div id="splitBillModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:10000;">
+        <div style="background:white;padding:20px;border-radius:8px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;">
+            <h3>Split Bill</h3>
+            <div id="splitBillItems"></div>
+            <div style="margin:20px 0;">
+                <h4>Split Options:</h4>
+                <button id="splitByQuantity" style="margin-right:10px;">Split by Quantity</button>
+                <button id="splitEqually" style="margin-right:10px;">Split Equally</button>
+                <button id="splitByItem">Split by Item</button>
+            </div>
+            <div id="splitBillDetails" style="margin:20px 0;"></div>
+            <button id="cancelSplitBill">Cancel</button>
+            <button id="confirmSplitBill">Confirm Split</button>
+        </div>
+    </div>
+
+    <!-- Merge Tables Modal -->
+    <div id="mergeTablesModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:10000;">
+        <div style="background:white;padding:20px;border-radius:8px;max-width:400px;width:90%;">
+            <h3>Merge Tables</h3>
+            <p>Select source and target tables to merge:</p>
+            <label>Source Table:</label>
+            <select id="mergeSourceTable" style="width:100%;margin:10px 0;padding:8px;"></select>
+            <label>Target Table:</label>
+            <select id="mergeTargetTable" style="width:100%;margin:10px 0;padding:8px;"></select>
+            <button id="cancelMergeTables" style="margin-right:10px;">Cancel</button>
+            <button id="confirmMergeTables">Merge Tables</button>
+        </div>
+    </div>
+
+    <!-- Move Table Modal -->
+    <div id="moveTableModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:10000;">
+        <div style="background:white;padding:20px;border-radius:8px;max-width:400px;width:90%;">
+            <h3>Move Table</h3>
+            <p>Select the table to move this order to:</p>
+            <select id="moveTargetTable" style="width:100%;margin:10px 0;padding:8px;"></select>
+            <button id="cancelMoveTable" style="margin-right:10px;">Cancel</button>
+            <button id="confirmMoveTable">Move Order</button>
+        </div>
+    </div>
+
+    <!-- Discount Modal -->
+    <div id="discountModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:10000;">
+        <div style="background:white;padding:20px;border-radius:8px;max-width:400px;width:90%;">
+            <h3>Apply Discount</h3>
+            <label>Discount Type:</label>
+            <select id="discountType" style="width:100%;margin:10px 0;padding:8px;">
+                <option value="percentage">Percentage (%)</option>
+                <option value="flat">Flat Amount (NPR)</option>
+            </select>
+            <label>Discount Value:</label>
+            <input type="number" id="discountValue" min="0" style="width:100%;margin:10px 0;padding:8px;">
+            <label>Reason:</label>
+            <select id="discountReason" style="width:100%;margin:10px 0;padding:8px;">
+                <option value="staff">Staff Discount</option>
+                <option value="promotion">Promotion</option>
+                <option value="complaint">Customer Complaint</option>
+                <option value="other">Other</option>
+            </select>
+            <div id="discountWarning" style="color:red;margin:10px 0;display:none;"></div>
+            <button id="cancelDiscount" style="margin-right:10px;">Cancel</button>
+            <button id="confirmDiscount">Apply Discount</button>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:10000;">
+        <div style="background:white;padding:20px;border-radius:8px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;">
+            <h3>Process Payment</h3>
+            <div id="paymentOrderInfo" style="margin-bottom:15px;"></div>
+            <label>Payment Method:</label>
+            <select id="paymentMethod" style="width:100%;margin:10px 0;padding:8px;">
+                <option value="cash">Cash</option>
+                <option value="card">Card</option>
+                <option value="mobile">Mobile Wallet</option>
+                <option value="mixed">Mixed Payment</option>
+            </select>
+            <div id="cashPaymentDiv">
+                <label>Amount Received:</label>
+                <input type="number" id="amountReceived" min="0" style="width:100%;margin:10px 0;padding:8px;">
+                <div id="changeDue" style="font-weight:bold;margin:10px 0;"></div>
+            </div>
+            <div id="mixedPaymentDiv" style="display:none;">
+                <h4>Mixed Payment Breakdown:</h4>
+                <div id="mixedPaymentInputs"></div>
+                <button type="button" id="addPaymentMethod" style="margin-top:10px;">+ Add Payment Method</button>
+            </div>
+            <button id="cancelPayment" style="margin-right:10px;">Cancel</button>
+            <button id="confirmPayment">Process Payment</button>
+        </div>
+    </div>
+
     <script src="../js/config.js"></script>
     <script src="../js/storage.js"></script>
     <script src="../js/utils.js"></script>

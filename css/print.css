@@ -1,0 +1,42 @@
+/* Print styles for thermal receipts */
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #receiptModal, #receiptModal * {
+    visibility: visible;
+  }
+
+  #receiptModal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  #receiptModal > div {
+    width: 80mm;
+    margin: 0 auto;
+    padding: 5mm;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  #receiptModal button {
+    display: none;
+  }
+
+  #receiptContent {
+    font-size: 10px;
+  }
+
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+}

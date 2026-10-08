@@ -13,30 +13,45 @@
 <body>
     <header>
         <h2>Kitchen Panel</h2>
-        <button id="logoutBtn">Logout</button>
+        <div>
+            <button id="editAnnouncementBtn">Announcement</button>
+            <button id="soundToggleBtn">🔊</button>
+            <button id="logoutBtn">Logout</button>
+        </div>
     </header>
     <main>
-        <section id="kitchen-orders">
-            <h3>Incoming Orders</h3>
-            <div id="kitchenOrdersList"></div>
-            <div class="price-disclaimer">All prices in NPR. Menu images are for illustration.</div>
-        </section>
-        <section id="kitchen-notes">
-            <h3>Note to Waiter</h3>
-            <form id="noteForm">
-                <textarea id="kitchenNote" rows="3" placeholder="E.g. Out of chicken momo, use fresh basil only, etc."></textarea>
-                <button type="submit">Save Note</button>
-            </form>
-            <div id="latestNote"></div>
-        </section>
+        <div id="announcementText">No announcements</div>
+        <div class="kitchen-board">
+            <div class="kitchen-column">
+                <h3>New Orders <span id="new-count">0</span></h3>
+                <div id="new-orders"></div>
+            </div>
+            <div class="kitchen-column">
+                <h3>Preparing <span id="preparing-count">0</span></h3>
+                <div id="preparing-orders"></div>
+            </div>
+            <div class="kitchen-column">
+                <h3>Ready <span id="ready-count">0</span></h3>
+                <div id="ready-orders"></div>
+            </div>
+        </div>
     </main>
+    <div id="toast" style="display:none;position:fixed;top:20px;right:20px;padding:12px 24px;border-radius:8px;color:white;z-index:10000;"></div>
+    <div id="announcementModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:10000;">
+        <div style="background:white;padding:20px;border-radius:8px;max-width:500px;width:90%;">
+            <h3>Edit Announcement</h3>
+            <textarea id="announcementInput" rows="4" style="width:100%;margin:10px 0;"></textarea>
+            <button id="saveAnnouncementBtn">Save</button>
+            <button id="cancelAnnouncementBtn">Cancel</button>
+        </div>
+    </div>
     <script src="../js/config.js"></script>
     <script src="../js/storage.js"></script>
     <script src="../js/utils.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/common.js"></script>
     <script src="../js/ui.js"></script>
-    <script src="../js/kitchen.js"></script>
+    <script src="../js/cook.js"></script>
     <script>
         document.getElementById('logoutBtn').addEventListener('click', Auth.logout);
     </script>
