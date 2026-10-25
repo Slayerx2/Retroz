@@ -43,13 +43,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Kitchen Announcement
     function loadKitchenAnnouncement() {
-        const announcement = localStorage.getItem('kitchen_announcement') || '';
+        const announcement = KitchenNote.get();
         document.getElementById('announcementText').textContent = announcement || 'No announcements';
     }
 
     function saveKitchenAnnouncement(text) {
-        localStorage.setItem('kitchen_announcement', text);
+        KitchenNote.set(text);
         document.getElementById('announcementText').textContent = text || 'No announcements';
+        // Dispatch event to notify waiters
+        window.dispatchEvent(new Event('kitchen_announcement_updated'));
     }
 
     // Announcement modal
@@ -264,10 +266,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Auto-refresh every 30 seconds
     setInterval(renderKitchenBoard, 30000);
 
+    // Periodically refresh announcement (every 30 seconds)
+    setInterval(loadKitchenAnnouncement, 30000);
+
     // Event listeners
     window.addEventListener('orders_updated', renderKitchenBoard);
     window.addEventListener('storage', (e) => {
-        if (e.key === 'kitchen_announcement') {
+        if (e.key === CONFIG.STORAGE_KEYS.KITCHEN_NOTE) {
             loadKitchenAnnouncement();
         }
     });

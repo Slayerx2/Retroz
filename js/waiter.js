@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tableNumberInput = document.getElementById('tableNumber');
   const orderTypeInput = document.getElementById('orderType');
   const menuSearch = document.getElementById('menuSearch');
+  const categorySelect = document.getElementById('categorySelect');
 
   console.log('DOM elements:', {
     orderForm: !!orderForm,
@@ -23,71 +24,27 @@ document.addEventListener('DOMContentLoaded', () => {
     tablesGrid: !!tablesGrid,
     tableNumberInput: !!tableNumberInput,
     orderTypeInput: !!orderTypeInput,
-    menuSearch: !!menuSearch
+    menuSearch: !!menuSearch,
+    categorySelect: !!categorySelect
   });
 
-  // Favorite sections configuration
-  const favoriteSections = [
-    {
-      name: "Veg",
-      items: [
-        { key: "veg momo", label: "Veg Momo" },
-        { key: "paneer chilli", label: "Paneer Chilli" },
-        { key: "veg thukpa", label: "Veg Thukpa" },
-        { key: "aloo jeera", label: "Aloo Jeera" },
-        { key: "veg chowmein", label: "Veg Chowmein" },
-        { key: "paneer butter masala", label: "Paneer Butter Masala" },
-        { key: "dal bhat tarkari", label: "Dal Bhat Tarkari" },
-        { key: "veg fried rice", label: "Veg Fried Rice" }
-      ]
-    },
-    {
-      name: "Non-Veg",
-      items: [
-        { key: "chicken momo", label: "Chicken Momo" },
-        { key: "chicken chilli", label: "Chicken Chilli" },
-        { key: "buff momo", label: "Buff Momo" },
-        { key: "chicken thukpa", label: "Chicken Thukpa" },
-        { key: "chicken chowmein", label: "Chicken Chowmein" },
-        { key: "buff sukuti", label: "Buff Sukuti" },
-        { key: "chicken fried rice", label: "Chicken Fried Rice" },
-        { key: "egg curry", label: "Egg Curry" }
-      ]
-    },
-    {
-      name: "Snacks",
-      items: [
-        { key: "french fries", label: "French Fries" },
-        { key: "samosa", label: "Samosa" },
-        { key: "pakoda", label: "Pakoda" },
-        { key: "spring roll", label: "Spring Roll" },
-        { key: "wai wai sadeko", label: "Wai Wai Sadeko" }
-      ]
-    },
-    {
-      name: "Drinks",
-      items: [
-        { key: "black tea", label: "Black Tea" },
-        { key: "milk tea", label: "Milk Tea" },
-        { key: "lemon tea", label: "Lemon Tea" },
-        { key: "espresso", label: "Espresso" },
-        { key: "cappuccino", label: "Cappuccino" },
-        { key: "latte", label: "Latte" },
-        { key: "cold coffee", label: "Cold Coffee" },
-        { key: "lassi", label: "Lassi" },
-        { key: "fresh lemon soda", label: "Fresh Lemon Soda" },
-        { key: "bottled water", label: "Bottled Water" }
-      ]
-    },
-    {
-      name: "Bakery & Sweets",
-      items: [
-        { key: "chocolate cake", label: "Chocolate Cake" },
-        { key: "sel roti", label: "Sel Roti" },
-        { key: "kheer", label: "Kheer" }
-      ]
-    }
-  ];
+  // Get categories from Categories service
+  const categories = Categories.get();
+
+  // Populate category dropdown
+  function populateCategories() {
+    categorySelect.innerHTML = '<option value="">All Categories</option>';
+    categories.forEach(cat => {
+      const option = document.createElement('option');
+      option.value = cat.id;
+      option.textContent = cat.name;
+      categorySelect.appendChild(option);
+    });
+  }
+  populateCategories();
+
+  // Quick access / favorites items (for fast ordering)
+  // Removed as per user request
 
   // Table management
   function getTableStatus() {
@@ -172,79 +129,53 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Render favorites bar
-  function renderFavoritesBar() {
-    const bar = document.getElementById('favoritesBar');
-    if (!bar) return;
-    bar.innerHTML = '';
-    favoriteSections.forEach(section => {
-      const sectionDiv = document.createElement('div');
-      sectionDiv.className = 'favorites-section';
-      
-      const title = document.createElement('div');
-      title.className = 'fav-section-title';
-      title.textContent = section.name;
-      sectionDiv.appendChild(title);
-      
-      const btnRow = document.createElement('div');
-      btnRow.className = 'fav-section-row';
-      
-      section.items.forEach(fav => {
-        const item = menu.find(m => {
-          const menuName = m.name.toLowerCase();
-          const favKey = fav.key.toLowerCase();
-          return menuName === favKey || menuName.includes(favKey) || favKey.includes(menuName);
-        });
-        
-        const btn = document.createElement('button');
-        btn.className = 'fav-btn';
-        if (item && selectedItems.some(i => i.id === item.id)) btn.classList.add('selected');
-        btn.innerHTML = fav.label;
-        
-        if (item) {
-          btn.onclick = () => {
-            const idxSel = selectedItems.findIndex(i => i.id === item.id);
-            if (idxSel === -1) selectedItems.push(item);
-            else selectedItems.splice(idxSel, 1);
-            renderMenuGrid();
-            renderFavoritesBar();
-            renderOrderSummary();
-          };
-        } else {
-          btn.disabled = true;
-          btn.classList.add('disabled');
-        }
-        btnRow.appendChild(btn);
-      });
-      
-      sectionDiv.appendChild(btnRow);
-      bar.appendChild(sectionDiv);
-    });
-  }
+  // Category change handler
+  categorySelect.addEventListener('change', () => {
+    renderMenuGrid();
+  });
 
-  // Render menu grid
+  // Search handler
+  menuSearch.addEventListener('input', () => {
+    renderMenuGrid();
+  });
+
+  // Render menu grid based on selected category
   function renderMenuGrid() {
     const grid = document.getElementById('menuGrid');
     if (!grid) return;
     grid.innerHTML = '';
-    const filteredMenu = getFilteredMenu();
+
+    const selectedCategory = categorySelect.value; // Keep as ID
+    const searchTerm = menuSearch.value.toLowerCase();
+
+    let filteredMenu = menu;
+
+    // Filter by category if selected
+    if (selectedCategory) {
+      filteredMenu = menu.filter(item => item.category === selectedCategory);
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      filteredMenu = filteredMenu.filter(item => item.name.toLowerCase().includes(searchTerm));
+    }
+
+    // Show empty state if no items
+    if (filteredMenu.length === 0) {
+      grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2em; color: #888;">No items found in this category</div>';
+      return;
+    }
+
     filteredMenu.forEach(item => {
       const card = document.createElement('div');
-      card.className = 'menu-card' + (selectedItems.some(i => i.id === item.id) ? ' selected' : '');
+      const isSelected = selectedItems.some(i => i.id === item.id);
+      const selectedItem = selectedItems.find(i => i.id === item.id);
+      const quantity = selectedItem ? selectedItem.quantity : 1;
+
+      card.className = 'menu-card' + (isSelected ? ' selected' : '');
       card.tabIndex = 0;
       card.style.outline = 'none';
-      card.onclick = () => {
-        const idx = selectedItems.findIndex(i => i.id === item.id);
-        if (idx === -1) {
-          selectedItems.push(item);
-        } else {
-          selectedItems.splice(idx, 1);
-        }
-        renderMenuGrid();
-        renderFavoritesBar();
-        renderOrderSummary();
-      };
-      
+
       let img = '';
       if (item.img) {
         if (item.img.startsWith('assets/')) {
@@ -253,23 +184,98 @@ document.addEventListener('DOMContentLoaded', () => {
           img = `<span class='emoji'>${item.img}</span>`;
         }
       }
-      
-      card.innerHTML = `${img}<div>${item.name}</div><div style='font-size:0.85em;color:#aaa;'>${Utils.formatCurrency(item.price)}</div>`;
+
+      card.innerHTML = `
+        ${img}
+        <div class="item-name">${item.name}</div>
+        <div class="item-price">${Utils.formatCurrency(item.price)}</div>
+        <div class="item-quantity">
+          <button class="qty-btn minus" data-id="${item.id}">-</button>
+          <span class="qty-value">${quantity}</span>
+          <button class="qty-btn plus" data-id="${item.id}">+</button>
+        </div>
+      `;
+
+      // Quantity button handlers
+      card.querySelector('.minus').addEventListener('click', (e) => {
+        e.stopPropagation();
+        updateItemQuantity(item.id, -1);
+      });
+
+      card.querySelector('.plus').addEventListener('click', (e) => {
+        e.stopPropagation();
+        updateItemQuantity(item.id, 1);
+      });
+
+      // Add item on card click
+      card.addEventListener('click', () => {
+        updateItemQuantity(item.id, 1);
+      });
+
       grid.appendChild(card);
     });
   }
 
+  function updateItemQuantity(itemId, change) {
+    const idx = selectedItems.findIndex(i => i.id === itemId);
+    const menuItem = menu.find(m => m.id === itemId);
+
+    if (idx !== -1) {
+      selectedItems[idx].quantity += change;
+      if (selectedItems[idx].quantity <= 0) {
+        selectedItems.splice(idx, 1);
+      }
+    } else if (change > 0 && menuItem) {
+      selectedItems.push({
+        id: menuItem.id,
+        name: menuItem.name,
+        price: menuItem.price,
+        quantity: 1
+      });
+    }
+
+    renderMenuGrid();
+    renderOrderSummary();
+  }
+
   // Render order summary
   function renderOrderSummary() {
+    const summaryPane = document.getElementById('orderSummaryPane');
     const itemsDiv = document.getElementById('summaryItems');
-    if (!itemsDiv) return;
+    
+    if (!summaryPane || !itemsDiv) return;
+    
+    // Show/hide summary based on items
     if (!selectedItems.length) {
-      itemsDiv.textContent = 'No items yet.';
+      summaryPane.style.display = 'none';
       return;
     }
-    const total = Utils.calculateTotal(selectedItems);
-    itemsDiv.innerHTML = selectedItems.map(i => `<span style='margin-right:12px;'>${i.name}</span>`).join('') + 
-                      `<b style='margin-left:18px;color:#004E89;'>${Utils.formatCurrency(total)}</b>`;
+    
+    summaryPane.style.display = 'block';
+
+    itemsDiv.innerHTML = selectedItems.map(item => `
+      <div class="summary-item">
+        <span>${item.name} x${item.quantity || 1}</span>
+        <span>${Utils.formatCurrency(item.price * (item.quantity || 1))}</span>
+        <button class="remove-item" data-id="${item.id}">×</button>
+      </div>
+    `).join('');
+
+    // Add remove handlers
+    itemsDiv.querySelectorAll('.remove-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        const idx = selectedItems.findIndex(i => i.id === id);
+        if (idx !== -1) {
+          selectedItems.splice(idx, 1);
+          renderMenuGrid();
+          renderOrderSummary();
+        }
+      });
+    });
+
+    const total = selectedItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+    itemsDiv.innerHTML += `<div class="summary-total"><strong>Total: ${Utils.formatCurrency(total)}</strong></div>`;
   }
 
   // Render orders
@@ -290,7 +296,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <div>Items: ${order.items.map(i => i.name).join(', ')}</div>
         <div>Status: ${order.status} | Total: ${Utils.formatCurrency(totals.total)}</div>
         <div style="margin-top:8px;">
-          <button onclick="openSplitBillModal('${order.id}')" style="margin-right:5px;font-size:12px;padding:4px 8px;">Split Bill</button>
           <button onclick="openDiscountModal('${order.id}')" style="margin-right:5px;font-size:12px;padding:4px 8px;">Discount</button>
           <button onclick="openMoveTableModal('${order.id}')" style="margin-right:5px;font-size:12px;padding:4px 8px;">Move Table</button>
           <button onclick="openPaymentModal('${order.id}')" style="font-size:12px;padding:4px 8px;">Pay</button>
@@ -305,54 +310,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const noteDiv = document.getElementById('waiterKitchenNote');
     if (!noteDiv) return;
     const note = KitchenNote.get();
-    noteDiv.textContent = note || 'No note from kitchen.';
+    noteDiv.textContent = note || 'No announcement from kitchen.';
   }
 
-  // Print modals
-  function showPrintModals(order) {
-    document.querySelectorAll('.print-modal').forEach(e => e.remove());
-    
-    const total = Utils.calculateTotal(order.items) + (order.tip || 0);
-    
-    const kitchen = document.createElement('div');
-    kitchen.className = 'print-modal';
-    kitchen.innerHTML = `
-      <h2>Kitchen Slip</h2>
-      <div><b>Table:</b> ${order.table}</div>
-      <div><b>Waiter:</b> ${order.waiter}</div>
-      <div><b>Type:</b> ${order.orderType === 'takeaway' ? 'Take Away' : 'Dine In'}</div>
-      <div><b>Items:</b><ul style='margin:0 0 0 1em;padding:0;'>${order.items.map(i => `<li>${i.name} - ${Utils.formatCurrency(i.price)}</li>`).join('')}</ul></div>
-      <div><b>Tip:</b> ${Utils.formatCurrency(order.tip || 0)}</div>
-      <div><b>Total:</b> ${Utils.formatCurrency(total)} <span style='font-size:0.9em;color:#888;'>(VAT included)</span></div>
-      <button onclick="window.print()">Print</button>
-      <button onclick="this.parentElement.remove()">Close</button>
-    `;
-    document.body.appendChild(kitchen);
-    
-    const bill = document.createElement('div');
-    bill.className = 'print-modal';
-    bill.style.left = '60%';
-    bill.innerHTML = `
-      <h2>Customer Bill</h2>
-      <div><b>Table:</b> ${order.table}</div>
-      <div><b>Waiter:</b> ${order.waiter}</div>
-      <div><b>Type:</b> ${order.orderType === 'takeaway' ? 'Take Away' : 'Dine In'}</div>
-      <div><b>Items:</b><ul style='margin:0 0 0 1em;padding:0;'>${order.items.map(i => `<li>${i.name} - ${Utils.formatCurrency(i.price)}</li>`).join('')}</ul></div>
-      <div><b>Tip:</b> ${Utils.formatCurrency(order.tip || 0)}</div>
-      <div><b>Total:</b> ${Utils.formatCurrency(total)} <span style='font-size:0.9em;color:#888;'>(VAT included)</span></div>
-      <button onclick="window.print()">Print</button>
-      <button onclick="this.parentElement.remove()">Close</button>
-    `;
-    document.body.appendChild(bill);
-  }
+  // Listen for kitchen announcement updates
+  window.addEventListener('kitchen_announcement_updated', showKitchenNote);
 
-  // Order form submit
+  // Listen for localStorage changes (cross-tab sync)
+  window.addEventListener('storage', (e) => {
+    if (e.key === CONFIG.STORAGE_KEYS.KITCHEN_NOTE) {
+      showKitchenNote();
+    }
+  });
+
+  // Order form submit (Send to Kitchen)
   orderForm.onsubmit = function(e) {
     e.preventDefault();
     const table = parseInt(tableNumberInput.value);
     const tip = parseFloat(document.getElementById('tip').value) || 0;
     const orderType = orderTypeInput.value;
-    
+
     if (orderType === 'dinein') {
       const status = getTableStatus();
       if (!table || status[table] === 'occupied') {
@@ -360,16 +337,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
     }
-    
+
     if (selectedItems.length === 0) {
       UI.alert('Select at least one item.');
       return;
     }
-    
-    const items = selectedItems.map(item => ({ id: item.id, name: item.name, price: item.price }));
+
+    const items = selectedItems.map(item => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity || 1
+    }));
     const user = Auth.getCurrentUser();
     const note = document.getElementById('orderNote').value;
-    
+
     const order = {
       id: Utils.generateId('o'),
       table,
@@ -381,41 +363,17 @@ document.addEventListener('DOMContentLoaded', () => {
       note,
       orderType
     };
-    
+
     Orders.add(order);
-    showPrintModals(order);
+    UI.alert('Order sent to kitchen successfully!');
     orderForm.reset();
+    categorySelect.value = '';
     selectedItems.length = 0;
-    renderMenu();
+    renderMenuGrid();
+    renderOrderSummary();
+    renderOrders();
   };
 
-  // FAB buttons
-  const fabNewOrder = document.getElementById('fabNewOrder');
-  if (fabNewOrder) {
-    fabNewOrder.onclick = () => {
-      orderForm.reset();
-      selectedItems.length = 0;
-      renderMenu();
-      renderOrderSummary();
-    };
-  }
-  
-  const fabClear = document.getElementById('fabClear');
-  if (fabClear) {
-    fabClear.onclick = () => {
-      selectedItems.length = 0;
-      renderMenu();
-      renderOrderSummary();
-    };
-  }
-  
-  const fabHelp = document.getElementById('fabHelp');
-  if (fabHelp) {
-    fabHelp.onclick = () => {
-      UI.alert('Need help? Call +91 XXXX-XXXXXX or ask your manager.');
-    };
-  }
-  
   const toggleDark = document.getElementById('toggleDark');
   if (toggleDark) {
     toggleDark.onclick = () => {
@@ -426,19 +384,91 @@ document.addEventListener('DOMContentLoaded', () => {
   const summaryCheckout = document.getElementById('summaryCheckout');
   if (summaryCheckout) {
     summaryCheckout.onclick = () => {
-      orderForm.requestSubmit();
+      // Create a temporary order for checkout
+      const table = parseInt(tableNumberInput.value) || 0;
+      const tip = parseFloat(document.getElementById('tip').value) || 0;
+      const orderType = orderTypeInput.value;
+      const note = document.getElementById('orderNote').value;
+
+      const order = {
+        id: Utils.generateId('o'),
+        table,
+        items: selectedItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity || 1
+        })),
+        status: 'paid',
+        createdAt: new Date().toISOString(),
+        waiter: Auth.getCurrentUser()?.username,
+        tip,
+        note,
+        orderType
+      };
+
+      // Show receipt
+      showReceipt(order);
     };
   }
 
-  // Main render function
-  function renderMenu() {
-    renderFavoritesBar();
-    renderMenuGrid();
+  function showReceipt(order) {
+    const modal = document.getElementById('receiptModal');
+    const content = document.getElementById('receiptContent');
+
+    const totals = CommercialPOS.calculateOrderTotals(order);
+
+    content.innerHTML = `
+      <div style="text-align:center;border-bottom:1px dashed #000;padding-bottom:10px;margin-bottom:10px;">
+        <h3 style="margin:0;">☕ CaféPOS</h3>
+        <div style="font-size:12px;margin:5px 0;">Receipt</div>
+        <div style="font-size:11px;">${new Date().toLocaleString()}</div>
+      </div>
+      <div style="margin-bottom:10px;font-size:12px;">
+        <div><strong>Table:</strong> ${order.table || 'N/A'}</div>
+        <div><strong>Type:</strong> ${order.orderType === 'takeaway' ? 'Take Away' : 'Dine In'}</div>
+        <div><strong>Waiter:</strong> ${order.waiter || 'N/A'}</div>
+      </div>
+      <div style="border-bottom:1px dashed #000;padding-bottom:10px;margin-bottom:10px;font-size:12px;">
+        ${order.items.map(item => `
+          <div style="display:flex;justify-content:space-between;margin:2px 0;">
+            <span>${item.name} x${item.quantity || 1}</span>
+            <span>${Utils.formatCurrency(item.price * (item.quantity || 1))}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div style="border-top:1px dashed #000;padding-top:10px;margin-top:10px;font-size:12px;">
+        <div style="display:flex;justify-content:space-between;"><span>Subtotal:</span><span>${Utils.formatCurrency(totals.subtotal)}</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>VAT (13%):</span><span>${Utils.formatCurrency(totals.vat)}</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>Service Charge (10%):</span><span>${Utils.formatCurrency(totals.serviceCharge)}</span></div>
+        ${order.tip ? `<div style="display:flex;justify-content:space-between;"><span>Tip:</span><span>${Utils.formatCurrency(order.tip)}</span></div>` : ''}
+        <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:14px;margin-top:8px;"><span>TOTAL:</span><span>${Utils.formatCurrency(totals.total)}</span></div>
+      </div>
+      <div style="text-align:center;margin-top:20px;font-size:11px;">
+        Thank you for dining with us!
+      </div>
+    `;
+
+    modal.style.display = 'flex';
   }
+
+  document.getElementById('closeReceipt').addEventListener('click', () => {
+    document.getElementById('receiptModal').style.display = 'none';
+    // Clear order after closing receipt
+    selectedItems.length = 0;
+    renderMenuGrid();
+    renderOrderSummary();
+    orderForm.reset();
+    categorySelect.value = '';
+  });
+
+  document.getElementById('printReceipt').addEventListener('click', () => {
+    window.print();
+  });
 
   // Event listeners
   window.addEventListener('orders_updated', renderOrders);
-  window.addEventListener('menu_updated', renderMenu);
+  window.addEventListener('menu_updated', renderMenuGrid);
   if (menuSearch) {
     menuSearch.addEventListener('input', Utils.debounce(renderMenuGrid, 300));
   }
@@ -452,109 +482,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial render
   console.log('Starting initial render...');
   renderTables();
-  renderMenu();
+  renderMenuGrid();
   renderOrders();
   renderOrderSummary();
   showKitchenNote();
   console.log('Initial render complete');
 
+  // Periodically refresh kitchen note (every 30 seconds)
+  setInterval(showKitchenNote, 30000);
+
   // ===== COMMERCIAL POS FEATURES =====
 
-  // Split Bill Modal
-  let currentSplitOrder = null;
-
-  window.openSplitBillModal = function(orderId) {
-    const order = Orders.get().find(o => o.id === orderId);
-    if (!order) return;
-
-    currentSplitOrder = order;
-    const modal = document.getElementById('splitBillModal');
-    const itemsDiv = document.getElementById('splitBillItems');
-
-    itemsDiv.innerHTML = order.items.map(item => `
-      <div style="margin:8px 0;padding:8px;background:#f5f5f5;border-radius:4px;">
-        <strong>${item.name}</strong> - ${Utils.formatCurrency(item.price)}
-        <div>
-          <label>Quantity:</label>
-          <input type="number" class="split-quantity" data-item-id="${item.id}" value="${item.quantity || 1}" min="0" max="${item.quantity || 1}" style="width:60px;padding:4px;">
-        </div>
-      </div>
-    `).join('');
-
-    modal.style.display = 'flex';
-  };
-
-  document.getElementById('cancelSplitBill').addEventListener('click', () => {
-    document.getElementById('splitBillModal').style.display = 'none';
-    currentSplitOrder = null;
-  });
-
-  document.getElementById('splitByQuantity').addEventListener('click', () => {
-    if (!currentSplitOrder) return;
-
-    const splits = [];
-    const quantityInputs = document.querySelectorAll('.split-quantity');
-    const split1 = {};
-    const split2 = {};
-
-    quantityInputs.forEach(input => {
-      const itemId = parseInt(input.dataset.itemId);
-      const qty = parseInt(input.value);
-      const item = currentSplitOrder.items.find(i => i.id === itemId);
-      const maxQty = item.quantity || 1;
-
-      if (qty > 0 && qty <= maxQty) {
-        split1[itemId] = qty;
-        split2[itemId] = maxQty - qty;
-      }
-    });
-
-    splits.push(split1, split2);
-    const bills = CommercialPOS.splitByQuantity(currentSplitOrder, splits);
-
-    displaySplitBills(bills);
-  });
-
-  document.getElementById('splitEqually').addEventListener('click', () => {
-    if (!currentSplitOrder) return;
-
-    const numberOfSplits = prompt('How many splits?', '2');
-    if (!numberOfSplits || isNaN(numberOfSplits)) return;
-
-    const bills = CommercialPOS.splitEqually(currentSplitOrder, parseInt(numberOfSplits));
-    displaySplitBills(bills);
-  });
-
-  function displaySplitBills(bills) {
-    const detailsDiv = document.getElementById('splitBillDetails');
-    detailsDiv.innerHTML = bills.map(bill => `
-      <div style="margin:10px 0;padding:10px;background:#e8f5e9;border-radius:4px;">
-        <h4>Bill ${bill.billNumber}</h4>
-        <div>Subtotal: ${Utils.formatCurrency(bill.subtotal)}</div>
-        <div>VAT: ${Utils.formatCurrency(bill.vat)}</div>
-        <div>Service Charge: ${Utils.formatCurrency(bill.serviceCharge)}</div>
-        <div><strong>Total: ${Utils.formatCurrency(bill.total)}</strong></div>
-        <button onclick="payBill('${bill.id}')" style="margin-top:8px;">Pay Bill</button>
-      </div>
-    `).join('');
-  }
-
-  window.payBill = function(billId) {
-    const paymentMethod = prompt('Payment method (cash/card/upi):', 'cash');
-    if (!paymentMethod) return;
-
-    SplitBills.markBillPaid(billId, paymentMethod);
-
-    // Check if all bills are paid
-    if (currentSplitOrder && SplitBills.checkAllBillsPaid(currentSplitOrder.id)) {
-      Orders.updateStatus(currentSplitOrder.id, 'paid');
-      UI.alert('All bills paid. Order marked as paid.');
-      document.getElementById('splitBillModal').style.display = 'none';
-      renderOrders();
-    } else {
-      UI.alert('Bill paid successfully.');
-    }
-  };
+  // Split Bill functionality removed for now
+  // Can be re-enabled if needed in the future
 
   // Merge Tables Modal
   const mergeTablesBtn = document.getElementById('mergeTablesBtn');
@@ -568,10 +508,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const targetSelect = document.getElementById('mergeTargetTable');
 
     const status = getTableStatus();
-    const occupiedTables = Object.entries(status).filter(([_, s]) => s === 'occupied').map(([t, _]) => parseInt(t));
+    const allTables = Object.keys(status).map(t => parseInt(t));
 
-    sourceSelect.innerHTML = occupiedTables.map(t => `<option value="${t}">Table ${t}</option>`).join('');
-    targetSelect.innerHTML = occupiedTables.map(t => `<option value="${t}">Table ${t}</option>`).join('');
+    // Show all tables, but mark occupied ones
+    sourceSelect.innerHTML = allTables.map(t => 
+      `<option value="${t}">Table ${t} ${status[t] === 'occupied' ? '(Occupied)' : '(Available)'}</option>`
+    ).join('');
+    
+    targetSelect.innerHTML = allTables.map(t => 
+      `<option value="${t}">Table ${t} ${status[t] === 'occupied' ? '(Occupied)' : '(Available)'}</option>`
+    ).join('');
 
     modal.style.display = 'flex';
   }

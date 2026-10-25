@@ -1,5 +1,21 @@
 /* Waiter-specific styles */
 
+.category-selector {
+  margin-bottom: 1em;
+}
+
+.category-selector label {
+  font-weight: bold;
+  margin-right: 0.5em;
+}
+
+.category-selector select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+}
+
 #tablesGrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -16,7 +32,7 @@
 
 #menuGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 12px 8px;
   margin-bottom: 1em;
 }
@@ -28,6 +44,9 @@
   padding: 12px;
   cursor: pointer;
   transition: border-color 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .menu-card:hover {
@@ -54,6 +73,107 @@
   margin-bottom: 4px;
 }
 
+.menu-card .item-name {
+  font-weight: bold;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.menu-card .item-price {
+  color: #666;
+  font-size: 0.9em;
+  margin-bottom: 8px;
+}
+
+.menu-card .item-quantity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.menu-card .qty-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-card .qty-btn:hover {
+  background: #f0f0f0;
+}
+
+.menu-card .qty-value {
+  font-weight: bold;
+  min-width: 24px;
+  text-align: center;
+}
+
+#orderSummaryPane {
+  background: #fff;
+  border: 2px solid #eee;
+  border-radius: 8px;
+  padding: 1em;
+  margin-top: 1em;
+}
+
+#orderSummaryPane h3 {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  color: var(--primary);
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.summary-item .remove-item {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: #ff4444;
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.summary-item .remove-item:hover {
+  background: #cc0000;
+}
+
+.summary-total {
+  text-align: right;
+  padding-top: 12px;
+  margin-top: 8px;
+  border-top: 2px solid #333;
+}
+
+#orderSummaryPane {
+  background: #fff;
+  border: 2px solid #eee;
+  border-radius: 8px;
+  padding: 1em;
+  margin-top: 1em;
+}
+
+#orderSummaryPane h3 {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  color: var(--primary);
+}
+
 #kitchen-note-for-waiter {
   background: #232323;
   color: #fff;
@@ -72,16 +192,6 @@
   margin-top: 0;
   margin-bottom: 0.5em;
   font-size: 1.18em;
-}
-
-#fabCluster {
-  position: fixed;
-  bottom: 80px;
-  right: 24px;
-  z-index: 120;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
 }
 
 .print-modal {

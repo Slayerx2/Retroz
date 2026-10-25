@@ -4,6 +4,7 @@ const CONFIG = {
     ORDERS: 'cafe_orders',
     MENU: 'cafe_menu',
     USER: 'cafe_user',
+    CATEGORIES: 'cafe_categories',
     KITCHEN_NOTE: 'kitchenNote',
     SPLIT_BILLS: 'cafe_split_bills',
     TABLE_HISTORY: 'cafe_table_history',

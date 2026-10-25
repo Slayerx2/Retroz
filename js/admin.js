@@ -267,6 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
       card.innerHTML = `
         <div style="font-size:var(--font-size-2xl);font-weight:bold;">${i}</div>
         <div style="font-size:var(--font-size-sm);">${status[i] === 'free' ? 'Available' : 'Occupied'}</div>
+        <button onclick="removeTable(${i})" style="margin-top:10px;font-size:12px;padding:4px 8px;background:var(--danger);color:white;border:none;border-radius:4px;cursor:pointer;">Remove</button>
       `;
       grid.appendChild(card);
     }
@@ -286,6 +287,43 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `).join('');
   }
+
+  window.removeTable = function(tableNumber) {
+    if (confirm(`Are you sure you want to remove Table ${tableNumber}?`)) {
+      const status = getTableStatus();
+      if (status[tableNumber] === 'occupied') {
+        UI.alert('Cannot remove occupied table');
+        return;
+      }
+      CONFIG.TABLE_COUNT = Math.max(CONFIG.TABLE_COUNT - 1, 1);
+      renderTables();
+      UI.alert(`Table ${tableNumber} removed`);
+    }
+  };
+
+  window.openAddTableModal = function() {
+    document.getElementById('add-table-modal').style.display = 'flex';
+  };
+
+  window.closeAddTableModal = function() {
+    document.getElementById('add-table-modal').style.display = 'none';
+    document.getElementById('add-table-form').reset();
+  };
+
+  document.getElementById('add-table-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const tableNumber = parseInt(document.getElementById('table-number').value);
+    const capacity = parseInt(document.getElementById('table-capacity').value);
+
+    if (tableNumber > CONFIG.TABLE_COUNT) {
+      CONFIG.TABLE_COUNT = tableNumber;
+      renderTables();
+      closeAddTableModal();
+      UI.alert(`Table ${tableNumber} added with capacity ${capacity}`);
+    } else {
+      UI.alert(`Table ${tableNumber} already exists`);
+    }
+  });
 
   function getTableStatus() {
     const orders = Orders.get();
@@ -370,15 +408,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ===== CATEGORIES =====
   function renderCategories() {
-    const categories = ['Veg', 'Non-Veg', 'Snacks', 'Drinks', 'Bakery & Sweets'];
+    const categories = Categories.get();
     const list = document.getElementById('categories-list');
 
     list.innerHTML = categories.map(cat => `
-      <div class="activity-item">
-        <strong>${cat}</strong>
+      <div class="activity-item" style="display:flex;justify-content:space-between;align-items:center;">
+        <strong>${cat.name}</strong>
+        <button onclick="deleteCategory('${cat.id}')" style="font-size:12px;padding:4px 8px;background:var(--danger);color:white;border:none;border-radius:4px;cursor:pointer;">Delete</button>
       </div>
     `).join('');
   }
+
+  window.deleteCategory = function(categoryId) {
+    const category = Categories.getById(categoryId);
+    if (confirm(`Are you sure you want to delete category "${category.name}"?`)) {
+      Categories.remove(categoryId);
+      renderCategories();
+      UI.alert('Category deleted successfully');
+    }
+  };
 
   // ===== SALES OVERVIEW =====
   function renderSalesOverview() {
@@ -864,6 +912,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('product-modal-title').textContent = 'Add Product';
     document.getElementById('product-form').reset();
     document.getElementById('product-id').value = '';
+
+    // Populate categories from Categories service
+    const categories = Categories.get();
+    const categorySelect = document.getElementById('product-category');
+    categorySelect.innerHTML = categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+
     document.getElementById('product-modal').style.display = 'flex';
   };
 
@@ -875,6 +929,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const menu = Menu.get();
     const product = menu.find(p => p.id === id);
     if (!product) return;
+
+    // Populate categories from Categories service
+    const categories = Categories.get();
+    const categorySelect = document.getElementById('product-category');
+    categorySelect.innerHTML = categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
 
     document.getElementById('product-modal-title').textContent = 'Edit Product';
     document.getElementById('product-id').value = product.id;
@@ -896,7 +955,88 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('product-form').onsubmit = (e) => {
     e.preventDefault();
-    UI.alert('Product save functionality requires full implementation');
+    const id = document.getElementById('product-id').value;
+    const name = document.getElementById('product-name').value.trim();
+    const price = parseFloat(document.getElementById('product-price').value);
+    const category = document.getElementById('product-category').value;
+    const available = document.getElementById('product-available').checked;
+
+    if (!name || isNaN(price) || price < 0) {
+      UI.alert('Please fill in all required fields');
+      return;
+    }
+
+    const menu = Menu.get();
+
+    if (id) {
+      // Edit existing product
+      const idx = menu.findIndex(p => p.id === id);
+      if (idx !== -1) {
+        menu[idx] = { ...menu[idx], name, price, category, available };
+        Menu.set(menu);
+        renderProducts();
+        closeProductModal();
+        UI.alert('Product updated successfully');
+      }
+    } else {
+      // Add new product
+      const newProduct = {
+        id: Utils.generateId('item'),
+        name,
+        price,
+        category,
+        available,
+        img: '🍽️'
+      };
+      menu.push(newProduct);
+      Menu.set(menu);
+      renderProducts();
+      closeProductModal();
+      UI.alert('Product added successfully');
+    }
+  };
+
+  // ===== CATEGORY MODAL =====
+  window.openCategoryModal = function() {
+    document.getElementById('category-modal-title').textContent = 'Add Category';
+    document.getElementById('category-form').reset();
+    document.getElementById('category-id').value = '';
+    document.getElementById('category-modal').style.display = 'flex';
+  };
+
+  window.closeCategoryModal = function() {
+    document.getElementById('category-modal').style.display = 'none';
+  };
+
+  document.getElementById('category-form').onsubmit = (e) => {
+    e.preventDefault();
+    const id = document.getElementById('category-id').value;
+    const name = document.getElementById('category-name').value.trim();
+
+    if (!name) {
+      UI.alert('Category name is required');
+      return;
+    }
+
+    if (id) {
+      // Edit existing category
+      Categories.update(id, { name });
+      renderCategories();
+      closeCategoryModal();
+      UI.alert('Category updated successfully');
+    } else {
+      // Add new category
+      const newId = name.toLowerCase().replace(/\s+/g, '-');
+      const existing = Categories.getById(newId);
+      if (existing) {
+        UI.alert('Category already exists');
+        return;
+      }
+      Categories.add({ id: newId, name });
+      renderCategories();
+      closeCategoryModal();
+      UI.alert('Category added successfully');
+    }
   };
 
   // ===== REFUND/VOID MODAL =====
@@ -1061,14 +1201,83 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('audit-action-filter').addEventListener('change', renderAuditLog);
   document.getElementById('audit-user-filter').addEventListener('input', renderAuditLog);
 
+  // ===== INITIALIZE PRODUCT CATEGORY DROPDOWN =====
+  (function initializeProductCategoryDropdown() {
+    const categories = Categories.get();
+    const categorySelect = document.getElementById('product-category');
+    if (categorySelect) {
+      categorySelect.innerHTML = categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+    }
+  })();
+
   // ===== SALES OVERVIEW DATE FILTER =====
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
-      // Update dashboard based on selected range
+
+      const range = e.target.dataset.range;
+      const customRangeDiv = document.getElementById('custom-date-range');
+
+      if (range === 'custom') {
+        customRangeDiv.style.display = 'block';
+      } else {
+        customRangeDiv.style.display = 'none';
+        updateDashboardForRange(range);
+      }
     });
   });
+
+  window.applyCustomDateRange = function() {
+    const startDate = document.getElementById('custom-start-date').value;
+    const endDate = document.getElementById('custom-end-date').value;
+
+    if (!startDate || !endDate) {
+      UI.alert('Please select both start and end dates');
+      return;
+    }
+
+    updateDashboardForRange('custom', startDate, endDate);
+  };
+
+  function updateDashboardForRange(range, startDate, endDate) {
+    let orders = Orders.get();
+    const now = new Date();
+
+    if (range === 'today') {
+      const today = Utils.getTodayDate();
+      orders = orders.filter(o => o.createdAt && o.createdAt.startsWith(today));
+    } else if (range === 'yesterday') {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().slice(0, 10);
+      orders = orders.filter(o => o.createdAt && o.createdAt.startsWith(yesterdayStr));
+    } else if (range === '7days') {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      orders = orders.filter(o => o.createdAt && new Date(o.createdAt) >= sevenDaysAgo);
+    } else if (range === '30days') {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      orders = orders.filter(o => o.createdAt && new Date(o.createdAt) >= thirtyDaysAgo);
+    } else if (range === 'custom' && startDate && endDate) {
+      orders = orders.filter(o => {
+        const orderDate = o.createdAt ? new Date(o.createdAt).toISOString().slice(0, 10) : '';
+        return orderDate >= startDate && orderDate <= endDate;
+      });
+    }
+
+    const paidOrders = orders.filter(o => o.status === 'paid' || o.status === 'completed');
+    const totalSales = paidOrders.reduce((sum, o) => {
+      const totals = CommercialPOS.calculateOrderTotals(o);
+      return sum + totals.total;
+    }, 0);
+    const avgOrder = paidOrders.length > 0 ? totalSales / paidOrders.length : 0;
+
+    document.getElementById('summary-revenue').textContent = Utils.formatCurrency(totalSales);
+    document.getElementById('summary-orders').textContent = paidOrders.length;
+    document.getElementById('summary-avg').textContent = Utils.formatCurrency(avgOrder);
+  }
 
   // ===== LOGOUT =====
   document.getElementById('logoutBtn').addEventListener('click', Auth.logout);

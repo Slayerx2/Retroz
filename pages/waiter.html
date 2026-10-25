@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../css/components.css" />
     <link rel="stylesheet" href="../css/waiter.css" />
     <link rel="stylesheet" href="../css/responsive.css" />
+    <link rel="stylesheet" href="../css/print.css" media="print" />
 </head>
 <body>
     <header>
@@ -41,8 +42,16 @@
                     <option value="takeaway">Take Away</option>
                 </select>
                 <input type="number" id="tableNumber" placeholder="Table # (auto-filled for Dine In)" min="1" max="10" required>
-                <input type="text" id="menuSearch" placeholder="Search menu (e.g. spicy, veg, momo)">
-                <div id="favoritesBar"></div>
+
+                <!-- Category Dropdown -->
+                <div class="category-selector">
+                    <label>Filter by Category:</label>
+                    <select id="categorySelect">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+                
+                <input type="text" id="menuSearch" placeholder="Search menu items...">
                 <div id="menuGrid"></div>
                 <div class="price-disclaimer">All prices in NPR. Menu images are for illustration.</div>
                 <textarea id="orderNote" placeholder="Special instructions (optional)" rows="2"></textarea>
@@ -50,37 +59,16 @@
                 <button type="submit">Send to Kitchen</button>
             </form>
         </section>
-        <div id="orderSummaryPane">
+        <div id="orderSummaryPane" style="display:none;">
+            <h3>Current Order</h3>
             <div id="summaryItems">No items yet.</div>
             <button id="summaryCheckout">Checkout</button>
-        </div>
-        <div id="fabCluster">
-            <button class="fab" id="fabNewOrder" title="New Order">➕</button>
-            <button class="fab" id="fabClear" title="Clear">🧹</button>
-            <button class="fab" id="fabHelp" title="Help">❓</button>
         </div>
         <section id="active-orders">
             <h3>Active Orders</h3>
             <div id="ordersList"></div>
         </section>
     </main>
-
-    <!-- Split Bill Modal -->
-    <div id="splitBillModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:10000;">
-        <div style="background:white;padding:20px;border-radius:8px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;">
-            <h3>Split Bill</h3>
-            <div id="splitBillItems"></div>
-            <div style="margin:20px 0;">
-                <h4>Split Options:</h4>
-                <button id="splitByQuantity" style="margin-right:10px;">Split by Quantity</button>
-                <button id="splitEqually" style="margin-right:10px;">Split Equally</button>
-                <button id="splitByItem">Split by Item</button>
-            </div>
-            <div id="splitBillDetails" style="margin:20px 0;"></div>
-            <button id="cancelSplitBill">Cancel</button>
-            <button id="confirmSplitBill">Confirm Split</button>
-        </div>
-    </div>
 
     <!-- Merge Tables Modal -->
     <div id="mergeTablesModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:10000;">
@@ -155,6 +143,17 @@
             </div>
             <button id="cancelPayment" style="margin-right:10px;">Cancel</button>
             <button id="confirmPayment">Process Payment</button>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receiptModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:10000;">
+        <div class="receipt-content" style="background:white;padding:20px;border-radius:8px;max-width:400px;width:90%;max-height:90vh;overflow-y:auto;font-family:monospace;">
+            <div id="receiptContent"></div>
+            <div style="margin-top:20px;text-align:center;">
+                <button id="printReceipt" style="margin-right:10px;padding:8px 16px;">Print</button>
+                <button id="closeReceipt" style="padding:8px 16px;">Close</button>
+            </div>
         </div>
     </div>
 

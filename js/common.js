@@ -3,7 +3,7 @@
 // Local Storage Migration
 function migrateLocalStorage() {
   const currentVersion = Storage.get('cafe_schema_version', 0);
-  const targetVersion = 1;
+  const targetVersion = 2;
 
   if (currentVersion >= targetVersion) {
     console.log('LocalStorage schema is up to date.');
@@ -39,57 +39,152 @@ function migrateLocalStorage() {
     if (!Storage.get(CONFIG.STORAGE_KEYS.DAILY_REPORTS)) {
       Storage.set(CONFIG.STORAGE_KEYS.DAILY_REPORTS, []);
     }
+    if (!Storage.get(CONFIG.STORAGE_KEYS.CATEGORIES)) {
+      Storage.set(CONFIG.STORAGE_KEYS.CATEGORIES, defaultCategories);
+    }
 
     // Update version
-    Storage.set('cafe_schema_version', targetVersion);
-    console.log('Migration completed successfully.');
+    Storage.set('cafe_schema_version', 1);
+    console.log('Migration to version 1 completed successfully.');
+  }
+
+  if (currentVersion < 2) {
+    // Migrate menu items to add category field
+    const menu = Storage.get(CONFIG.STORAGE_KEYS.MENU);
+    if (menu) {
+      let needsUpdate = false;
+      menu.forEach(item => {
+        if (!item.category) {
+          needsUpdate = true;
+          // Assign category based on item ID ranges
+          if (item.id >= 1 && item.id <= 8) {
+            item.category = 'veg';
+          } else if (item.id >= 9 && item.id <= 16) {
+            item.category = 'non-veg';
+          } else if (item.id >= 17 && item.id <= 21) {
+            item.category = 'snacks';
+          } else if (item.id >= 22 && item.id <= 31) {
+            item.category = 'drinks';
+          } else if (item.id >= 32 && item.id <= 34) {
+            item.category = 'bakery';
+          }
+        }
+      });
+      if (needsUpdate) {
+        Storage.set(CONFIG.STORAGE_KEYS.MENU, menu);
+        console.log('Menu items migrated with category field.');
+      }
+    }
+
+    // Ensure categories exist
+    if (!Storage.get(CONFIG.STORAGE_KEYS.CATEGORIES)) {
+      Storage.set(CONFIG.STORAGE_KEYS.CATEGORIES, defaultCategories);
+    }
+
+    // Update version
+    Storage.set('cafe_schema_version', 2);
+    console.log('Migration to version 2 completed successfully.');
   }
 }
 
 // Run migration on load
 migrateLocalStorage();
 
+// Default categories
+const defaultCategories = [
+  { id: 'veg', name: 'Veg', order: 1 },
+  { id: 'non-veg', name: 'Non-Veg', order: 2 },
+  { id: 'snacks', name: 'Snacks', order: 3 },
+  { id: 'drinks', name: 'Drinks', order: 4 },
+  { id: 'bakery', name: 'Bakery & Sweets', order: 5 }
+];
+
+// Category operations
+const Categories = {
+  get() {
+    let categories = Storage.get(CONFIG.STORAGE_KEYS.CATEGORIES);
+    if (!categories) {
+      categories = defaultCategories;
+      Storage.set(CONFIG.STORAGE_KEYS.CATEGORIES, categories);
+    }
+    return categories;
+  },
+
+  set(categories) {
+    Storage.set(CONFIG.STORAGE_KEYS.CATEGORIES, categories);
+    window.dispatchEvent(new Event('categories_updated'));
+  },
+
+  getById(id) {
+    return this.get().find(c => c.id === id);
+  },
+
+  add(category) {
+    const categories = this.get();
+    category.id = category.id || category.name.toLowerCase().replace(/\s+/g, '-');
+    category.order = category.order || categories.length + 1;
+    categories.push(category);
+    this.set(categories);
+    return category;
+  },
+
+  update(id, updates) {
+    const categories = this.get();
+    const idx = categories.findIndex(c => c.id === id);
+    if (idx !== -1) {
+      categories[idx] = { ...categories[idx], ...updates };
+      this.set(categories);
+    }
+  },
+
+  remove(id) {
+    const categories = this.get();
+    const filtered = categories.filter(c => c.id !== id);
+    this.set(filtered);
+  }
+};
+
 // Nepali Café & Restaurant Menu
 const defaultMenu = [
   // Veg
-  { id: 1, name: 'Veg Momo', price: 120, available: true },
-  { id: 2, name: 'Paneer Chilli', price: 180, available: true },
-  { id: 3, name: 'Veg Thukpa', price: 120, available: true },
-  { id: 4, name: 'Aloo Jeera', price: 90, available: true },
-  { id: 5, name: 'Veg Chowmein', price: 120, available: true },
-  { id: 6, name: 'Paneer Butter Masala', price: 220, available: true },
-  { id: 7, name: 'Dal Bhat Tarkari', price: 180, available: true },
-  { id: 8, name: 'Veg Fried Rice', price: 120, available: true },
+  { id: 1, name: 'Veg Momo', price: 120, available: true, category: 'veg' },
+  { id: 2, name: 'Paneer Chilli', price: 180, available: true, category: 'veg' },
+  { id: 3, name: 'Veg Thukpa', price: 120, available: true, category: 'veg' },
+  { id: 4, name: 'Aloo Jeera', price: 90, available: true, category: 'veg' },
+  { id: 5, name: 'Veg Chowmein', price: 120, available: true, category: 'veg' },
+  { id: 6, name: 'Paneer Butter Masala', price: 220, available: true, category: 'veg' },
+  { id: 7, name: 'Dal Bhat Tarkari', price: 180, available: true, category: 'veg' },
+  { id: 8, name: 'Veg Fried Rice', price: 120, available: true, category: 'veg' },
   // Non-Veg
-  { id: 9, name: 'Chicken Momo', price: 160, available: true },
-  { id: 10, name: 'Chicken Chilli', price: 220, available: true },
-  { id: 11, name: 'Buff Momo', price: 150, available: true },
-  { id: 12, name: 'Chicken Thukpa', price: 150, available: true },
-  { id: 13, name: 'Chicken Chowmein', price: 150, available: true },
-  { id: 14, name: 'Buff Sukuti', price: 250, available: true },
-  { id: 15, name: 'Chicken Fried Rice', price: 150, available: true },
-  { id: 16, name: 'Egg Curry', price: 110, available: true },
+  { id: 9, name: 'Chicken Momo', price: 160, available: true, category: 'non-veg' },
+  { id: 10, name: 'Chicken Chilli', price: 220, available: true, category: 'non-veg' },
+  { id: 11, name: 'Buff Momo', price: 150, available: true, category: 'non-veg' },
+  { id: 12, name: 'Chicken Thukpa', price: 150, available: true, category: 'non-veg' },
+  { id: 13, name: 'Chicken Chowmein', price: 150, available: true, category: 'non-veg' },
+  { id: 14, name: 'Buff Sukuti', price: 250, available: true, category: 'non-veg' },
+  { id: 15, name: 'Chicken Fried Rice', price: 150, available: true, category: 'non-veg' },
+  { id: 16, name: 'Egg Curry', price: 110, available: true, category: 'non-veg' },
   // Snacks
-  { id: 17, name: 'French Fries', price: 90, available: true },
-  { id: 18, name: 'Samosa', price: 40, available: true },
-  { id: 19, name: 'Pakoda', price: 70, available: true },
-  { id: 20, name: 'Spring Roll', price: 90, available: true },
-  { id: 21, name: 'Wai Wai Sadeko', price: 80, available: true },
+  { id: 17, name: 'French Fries', price: 90, available: true, category: 'snacks' },
+  { id: 18, name: 'Samosa', price: 40, available: true, category: 'snacks' },
+  { id: 19, name: 'Pakoda', price: 70, available: true, category: 'snacks' },
+  { id: 20, name: 'Spring Roll', price: 90, available: true, category: 'snacks' },
+  { id: 21, name: 'Wai Wai Sadeko', price: 80, available: true, category: 'snacks' },
   // Drinks
-  { id: 22, name: 'Black Tea', price: 30, available: true },
-  { id: 23, name: 'Milk Tea', price: 40, available: true },
-  { id: 24, name: 'Lemon Tea', price: 50, available: true },
-  { id: 25, name: 'Espresso', price: 80, available: true },
-  { id: 26, name: 'Cappuccino', price: 120, available: true },
-  { id: 27, name: 'Latte', price: 130, available: true },
-  { id: 28, name: 'Cold Coffee', price: 120, available: true },
-  { id: 29, name: 'Lassi', price: 70, available: true },
-  { id: 30, name: 'Fresh Lemon Soda', price: 60, available: true },
-  { id: 31, name: 'Bottled Water', price: 25, available: true },
+  { id: 22, name: 'Black Tea', price: 30, available: true, category: 'drinks' },
+  { id: 23, name: 'Milk Tea', price: 40, available: true, category: 'drinks' },
+  { id: 24, name: 'Lemon Tea', price: 50, available: true, category: 'drinks' },
+  { id: 25, name: 'Espresso', price: 80, available: true, category: 'drinks' },
+  { id: 26, name: 'Cappuccino', price: 120, available: true, category: 'drinks' },
+  { id: 27, name: 'Latte', price: 130, available: true, category: 'drinks' },
+  { id: 28, name: 'Cold Coffee', price: 120, available: true, category: 'drinks' },
+  { id: 29, name: 'Lassi', price: 70, available: true, category: 'drinks' },
+  { id: 30, name: 'Fresh Lemon Soda', price: 60, available: true, category: 'drinks' },
+  { id: 31, name: 'Bottled Water', price: 25, available: true, category: 'drinks' },
   // Bakery & Sweets
-  { id: 32, name: 'Chocolate Cake', price: 120, available: true },
-  { id: 33, name: 'Sel Roti', price: 40, available: true },
-  { id: 34, name: 'Kheer', price: 60, available: true }
+  { id: 32, name: 'Chocolate Cake', price: 120, available: true, category: 'bakery' },
+  { id: 33, name: 'Sel Roti', price: 40, available: true, category: 'bakery' },
+  { id: 34, name: 'Kheer', price: 60, available: true, category: 'bakery' }
 ];
 
 // Menu operations

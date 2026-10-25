@@ -175,6 +175,19 @@
                                 <button class="filter-btn" data-range="30days">30 Days</button>
                                 <button class="filter-btn" data-range="custom">Custom</button>
                             </div>
+                            <div id="custom-date-range" class="custom-date-range" style="display:none; margin-top:15px; padding:15px; background:var(--bg-secondary); border-radius:8px;">
+                                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                                    <div>
+                                        <label style="font-size:var(--font-size-sm); display:block; margin-bottom:5px;">From:</label>
+                                        <input type="date" id="custom-start-date" style="padding:8px; border:1px solid var(--border-color); border-radius:4px;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size:var(--font-size-sm); display:block; margin-bottom:5px;">To:</label>
+                                        <input type="date" id="custom-end-date" style="padding:8px; border:1px solid var(--border-color); border-radius:4px;">
+                                    </div>
+                                    <button class="btn-primary" onclick="applyCustomDateRange()">Apply</button>
+                                </div>
+                            </div>
                             <div id="sales-chart-container" class="chart-container">
                                 <div class="no-data">No sales data for this period</div>
                             </div>
@@ -281,6 +294,9 @@
 
                 <!-- Tables Section -->
                 <section id="section-tables" class="content-section">
+                    <div class="section-toolbar">
+                        <button class="btn-primary" onclick="openAddTableModal()">+ Add Table</button>
+                    </div>
                     <div class="table-status-grid" id="table-status-grid"></div>
                     <div class="dashboard-card">
                         <h3>Table History</h3>
@@ -612,11 +628,7 @@
                     <div class="form-group">
                         <label>Category</label>
                         <select id="product-category" class="form-select" required>
-                            <option value="veg">Veg</option>
-                            <option value="non-veg">Non-Veg</option>
-                            <option value="snacks">Snacks</option>
-                            <option value="drinks">Drinks</option>
-                            <option value="bakery">Bakery & Sweets</option>
+                            <!-- Categories will be populated dynamically -->
                         </select>
                     </div>
                     <div class="form-group">
@@ -625,6 +637,49 @@
                         </label>
                     </div>
                     <button type="submit" class="btn-primary">Save Product</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="category-modal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3 id="category-modal-title">Add Category</h3>
+                <button class="modal-close" onclick="closeCategoryModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="category-form" class="settings-form">
+                    <input type="hidden" id="category-id">
+                    <div class="form-group">
+                        <label>Category Name</label>
+                        <input type="text" id="category-name" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Save Category</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Table Modal -->
+    <div id="add-table-modal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>Add Table</h3>
+                <button class="modal-close" onclick="closeAddTableModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-table-form" class="settings-form">
+                    <div class="form-group">
+                        <label>Table Number</label>
+                        <input type="number" id="table-number" class="form-input" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Capacity</label>
+                        <input type="number" id="table-capacity" class="form-input" min="1" value="4" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Add Table</button>
                 </form>
             </div>
         </div>

@@ -5,6 +5,21 @@
   background: var(--bg-secondary);
 }
 
+/* Custom Date Range */
+.custom-date-range {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+}
+
+.custom-date-range input[type="date"] {
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+}
+
 /* Sidebar */
 .admin-sidebar {
   width: 260px;
