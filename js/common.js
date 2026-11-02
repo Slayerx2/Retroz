@@ -104,9 +104,11 @@ const Categories = {
   get() {
     let categories = Storage.get(CONFIG.STORAGE_KEYS.CATEGORIES);
     if (!categories) {
+      console.log('Categories not found in storage, using defaults');
       categories = defaultCategories;
       Storage.set(CONFIG.STORAGE_KEYS.CATEGORIES, categories);
     }
+    console.log('Categories.get() returned:', categories);
     return categories;
   },
 
@@ -245,9 +247,11 @@ const Menu = {
   get() {
     let menu = Storage.get(CONFIG.STORAGE_KEYS.MENU);
     if (!menu) {
+      console.log('Menu not found in storage, using defaults');
       menu = defaultMenu;
       Storage.set(CONFIG.STORAGE_KEYS.MENU, menu);
     }
+    console.log('Menu.get() returned', menu.length, 'items');
     return menu;
   },
 
