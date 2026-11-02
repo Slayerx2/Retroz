@@ -90,6 +90,17 @@ function migrateLocalStorage() {
 // Run migration on load
 migrateLocalStorage();
 
+// Force initialize categories and menu if they don't exist (failsafe)
+if (!Storage.get(CONFIG.STORAGE_KEYS.CATEGORIES)) {
+  console.log('Force initializing categories');
+  Storage.set(CONFIG.STORAGE_KEYS.CATEGORIES, defaultCategories);
+}
+
+if (!Storage.get(CONFIG.STORAGE_KEYS.MENU)) {
+  console.log('Force initializing menu');
+  Storage.set(CONFIG.STORAGE_KEYS.MENU, defaultMenu);
+}
+
 // Default categories
 const defaultCategories = [
   { id: 'veg', name: 'Veg', order: 1 },
