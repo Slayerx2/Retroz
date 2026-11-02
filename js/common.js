@@ -144,6 +144,59 @@ const Categories = {
   }
 };
 
+// Tables operations
+const Tables = {
+  get() {
+    let tables = Storage.get(CONFIG.STORAGE_KEYS.TABLES);
+    if (!tables) {
+      // Initialize default tables
+      tables = [];
+      for (let i = 1; i <= CONFIG.TABLE_COUNT; i++) {
+        tables.push({
+          id: i,
+          name: `Table ${i}`,
+          capacity: 4,
+          status: 'available'
+        });
+      }
+      Storage.set(CONFIG.STORAGE_KEYS.TABLES, tables);
+    }
+    return tables;
+  },
+
+  set(tables) {
+    Storage.set(CONFIG.STORAGE_KEYS.TABLES, tables);
+    window.dispatchEvent(new Event('tables_updated'));
+  },
+
+  getById(id) {
+    return this.get().find(t => t.id === id);
+  },
+
+  add(table) {
+    const tables = this.get();
+    table.id = table.id || tables.length + 1;
+    tables.push(table);
+    this.set(tables);
+    return table;
+  },
+
+  update(id, updates) {
+    const tables = this.get();
+    const idx = tables.findIndex(t => t.id === id);
+    if (idx !== -1) {
+      tables[idx] = { ...tables[idx], ...updates };
+      this.set(tables);
+    }
+  },
+
+  remove(id) {
+    const tables = this.get();
+    const filtered = tables.filter(t => t.id !== id);
+    this.set(filtered);
+  }
+};
+
 // Nepali Café & Restaurant Menu
 const defaultMenu = [
   // Veg
